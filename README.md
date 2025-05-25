@@ -127,8 +127,7 @@ Required for Docker Compose to access the local SQL Server.
 - Enable **TCP/IP**
 - Restart **SQL Server Service** `SQL Server (MSSQLSERVER)`
 
-3. Run the application:
-### 3. 🚀 Run the application
+3. **Run the application:**
 
 You have two options to run the application using Docker Compose:
 
@@ -142,7 +141,7 @@ docker-compose up
 - In **Solution Explorer**, right-click on the `docker-compose` project.
 - Select **Set as Startup Project**.
 - Run the solution.
-- 
+
 📊 **View logs:** [http://localhost::8081](http://localhost::8081)
 
 ## 📊 Logging
