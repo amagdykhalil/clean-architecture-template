@@ -1,0 +1,43 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RuntimeIdentifiers>linux-x64</RuntimeIdentifiers>
+    <ContainerRuntimeIdentifier>linux-x64</ContainerRuntimeIdentifier>
+    <EnableSdkContainerDebugging>True</EnableSdkContainerDebugging>
+    <ContainerBaseImage>mcr.microsoft.com/dotnet/aspnet:9.0</ContainerBaseImage>
+    <UserSecretsId>a7f8908d-79a8-403f-b1e1-4559aefc51c5</UserSecretsId>
+    <DockerfileContext>..\..\..</DockerfileContext>
+    <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+    <DockerComposeProjectPath>..\..\..\docker-compose.dcproj</DockerComposeProjectPath>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Asp.Versioning.Mvc" Version="8.1.0" />
+    <PackageReference Include="Asp.Versioning.Mvc.ApiExplorer" Version="8.1.0" />
+    <PackageReference Include="Azure.Extensions.AspNetCore.Configuration.Secrets" Version="1.4.0" />
+    <PackageReference Include="Azure.Identity" Version="1.14.0" />
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.5" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.5" />
+    <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.21.0" />
+    <PackageReference Include="Scalar.AspNetCore" Version="2.4.3" />
+	  <PackageReference Include="Serilog.Sinks.Seq" Version="9.0.0" />
+	  <PackageReference Include="Serilog.Sinks.Console " Version="6.0.0" />
+    <PackageReference Include="Serilog.AspNetCore" Version="9.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Core\SolutionName.Application\SolutionName.Application.csproj" />
+    <ProjectReference Include="..\..\Infrastructure\SolutionName.Infrastructure\SolutionName.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\Infrastructure\SolutionName.Persistence\SolutionName.Persistence.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ContainerPort Include="8081" />
+  </ItemGroup>
+
+</Project>
+
+

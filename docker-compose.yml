@@ -1,0 +1,18 @@
+services:
+  solutionname.api:
+    image: ${DOCKER_REGISTRY-}solutionnameapi
+    container_name: solutionname-api
+    depends_on:
+      - solutionname.seq
+    build:
+      context: .
+      dockerfile: src/API/SolutionName.API/Dockerfile
+
+  solutionname.seq:
+    image: datalust/seq:latest
+    container_name: solutionname-seq
+    ports:
+      - "5341:5341"
+      - "8081:80"
+    environment:
+      - ACCEPT_EULA=Y

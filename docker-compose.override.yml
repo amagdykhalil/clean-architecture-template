@@ -1,0 +1,18 @@
+services:
+  solutionname.api:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_HTTP_PORTS=8080
+      - ASPNETCORE_HTTPS_PORTS=8081
+      - Serilog__WriteTo__1__Args__serverUrl=http://solutionname-seq:5341
+      - ConnectionStrings__DefaultConnection=Server=host.docker.internal;Database=SolutionNameDB;User Id=sa;Password=******;Encrypt=False;
+    ports:
+      - "5293:8080"
+      - "7144:8081"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes:
+      - ${APPDATA}/Microsoft/UserSecrets:/home/app/.microsoft/usersecrets:ro
+      - ${APPDATA}/Microsoft/UserSecrets:/root/.microsoft/usersecrets:ro
+      - ${APPDATA}/ASP.NET/Https:/home/app/.aspnet/https:ro
+      - ${APPDATA}/ASP.NET/Https:/root/.aspnet/https:ro
