@@ -83,7 +83,18 @@ Run the rename script to replace the placeholder name (**SolutionName**) with yo
 ```
 4.  Remove secrets from `appsettings`.
 
-### 4. Running the Application
+### 4. Database Setup
+
+#### Option A: Using Visual Studio
+- Run the following commands in **Package Manager Console** 
+- Set the default project to `YourSolution.Persistence`
+- Run the following commands:
+```powershell
+Add-Migration Initial
+Update-Database
+```
+
+### 5. Running the Application
 
 #### Option A: Using Visual Studio Profiles (HTTP/HTTPS)
 1. Download and install [Seq](https://datalust.co/Download) for log tracking
