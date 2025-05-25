@@ -54,7 +54,7 @@ Run the rename script to replace the placeholder name (**SolutionName**) with yo
 
 #### Option A: Use appsettings
 
-3. 📁 In  `appsettings.json` add the following secrets:
+3. 📁 In  `appsettings.json` edit the following to add your secrets:
 ```json
 "ConnectionStrings": {
   "DefaultConnection": "Server=.;Database=YourDb;User Id=sa;Password=yourStrongPassword;Encrypt=False;"
@@ -137,8 +137,6 @@ You have two options to run the application using Docker Compose:
 ```bash
 docker-compose up
 
-```bash
-docker-compose up
 ```
 ##### ✅ Option B: Use Visual Studio
 - In **Solution Explorer**, right-click on the `docker-compose` project.
