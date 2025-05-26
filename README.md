@@ -160,14 +160,14 @@ docker-compose up
 - Select **Set as Startup Project**.
 - Run the solution.
 
-📊 **View logs:** [http://localhost::8081](http://localhost::8081)
+📊 **View logs:** [http://localhost:8081](http://localhost:8081)
 
 ## 📊 Logging
 
 The application uses Serilog with Seq for structured logging. Logs can be viewed:
 
-- Locally: [http://localhost::5341](http://localhost::5341) (when running with Visual Studio)
-- Docker: [http://localhost::8081](http://localhost::8081) (when running with Docker Compose)
+- Locally: [http://localhost:5341](http://localhost:5341) (when running with Visual Studio)
+- Docker: [http://localhost:8081](http://localhost:8081) (when running with Docker Compose)
 
 ## 📚 API Documentation
 
