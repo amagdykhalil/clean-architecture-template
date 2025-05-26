@@ -28,6 +28,30 @@ function Update-TextInFiles {
     }
 }
 
+# Function to replace text in files with case options
+
+function Update-TextInFilesWithCase {
+    param(
+        [string]$Directory,
+        [string]$SearchText,
+        [string]$ReplaceText,
+        [string[]]$Files,
+        [bool]$IsLowerCase = $false
+    )
+    
+    $ReplaceText = if($IsLowerCase)  {$ReplaceText.ToLower()} else {$ReplaceText }
+    
+    foreach ($file in $Files) {
+        Get-ChildItem -Path $RootDirectory -Recurse -Filter $file | ForEach-Object {
+            $content = Get-Content $_.FullName -Raw
+            if ($content -match [regex]::Escape($SearchText)) {
+                $newContent = $content -replace [regex]::Escape($SearchText), $ReplaceText
+                Set-Content -Path $_.FullName -Value $newContent
+                Write-Host "Updated $file in: $($_.FullName)"
+            }
+        }
+    }
+}
 # Function to rename files and directories
 function Rename-ProjectFiles {
     param(
@@ -90,22 +114,25 @@ function Update-SolutionFile {
 # Main script
 try {
     Write-Host "Renaming project '$OldProjectName' to '$NewProjectName'..."
+    # 1. Update content in specific files with lowercase
+    $configFiles = @("docker-compose.override.yml", "docker-compose.yml", "launchSettings.json")
+    Update-TextInFilesWithCase -Directory $RootDirectory -SearchText $OldProjectName -ReplaceText $NewProjectName -Files $configFiles -IsLowerCase $true 
 
-    # 1. Update solution file
+    # 2. Update solution file
     $newSolutionFile = $SolutionFile -replace $OldProjectName, $NewProjectName
     Update-SolutionFile -SolutionPath $SolutionFile -SearchText $OldProjectName -ReplaceText $NewProjectName
     Rename-Item -Path $SolutionFile -NewName $newSolutionFile
 
-    # 2. Rename files and directories
+    # 3. Rename files and directories
     Rename-ProjectFiles -Directory $RootDirectory -SearchText $OldProjectName -ReplaceText $NewProjectName
 
-    # 3. Update project references
+    # 4. Update project references
     Update-ProjectReferences -Directory $RootDirectory -SearchText $OldProjectName -ReplaceText $NewProjectName
 
-    # 4. Replace text in code files (namespaces, etc.)
+    # 5. Replace text in code files (namespaces, etc.)
     Update-TextInFiles -Directory $RootDirectory -SearchText $OldProjectName -ReplaceText $NewProjectName
 
-    # 5. Update assembly names
+    # 6. Update assembly names
     Get-ChildItem -Path $RootDirectory -Filter "*.csproj" -Recurse | ForEach-Object {
         $content = Get-Content $_.FullName -Raw
         if ($content -match "<AssemblyName>$OldProjectName") {
@@ -114,37 +141,28 @@ try {
             Write-Host "Updated AssemblyName in: $($_.FullName)"
         }
     }
-
-    # 6. Update appsettings
-    Get-ChildItem -Path $RootDirectory -Recurse -Include "appsettings*.json" | ForEach-Object {
-        $content = Get-Content $_.FullName -Raw
-        if ($content -match [regex]::Escape($OldProjectName)) {
-            $newContent = $content -replace [regex]::Escape($OldProjectName), $NewProjectName
-            Set-Content -Path $_.FullName -Value $newContent
-            Write-Host "Updated appsettings in: $($_.FullName)"
-        }
-    }
-
-    # 7. Update Program.cs and Startup.cs
-    foreach ($file in @("Program.cs", "Startup.cs")) {
-        Get-ChildItem -Path $RootDirectory -Recurse -Filter $file | ForEach-Object {
-            $content = Get-Content $_.FullName -Raw
-            if ($content -match [regex]::Escape($OldProjectName)) {
-                $newContent = $content -replace [regex]::Escape($OldProjectName), $NewProjectName
-                Set-Content -Path $_.FullName -Value $newContent
-                Write-Host "Updated $file in: $($_.FullName)"
-            }
-        }
-    }
-
-    Write-Host "`n✅ Project rename completed successfully!"
-    Write-Host "👉 Review and rebuild the solution in your IDE."
-    Write-Host "🛠  You may need to manually fix NuGet, launchSettings.json, or IDE caches."
+    
+    Write-Host "`Project rename completed successfully!"
+    Write-Host " Review and rebuild the solution in your IDE."
+    Write-Host "You may need to manually fix NuGet, launchSettings.json, or IDE caches."
 
 } catch {
-    Write-Error "❌ An error occurred: $_"
+    Write-Error "An error occurred: $_"
     exit 1
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
