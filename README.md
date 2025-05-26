@@ -67,7 +67,7 @@ Run the rename script to replace the placeholder name (**SolutionName**) with yo
 "ConnectionStrings": {
   "DefaultConnection": "Server=.;Database=YourDb;User Id=sa;Password=yourStrongPassword;Encrypt=False;"
 },
-"JWT": {
+"JwtSettings": {
   "Secret": "your_jwt_secret_here"
 },
 "SmtpSettings": {
