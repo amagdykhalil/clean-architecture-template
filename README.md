@@ -45,7 +45,7 @@ src/
 ### 1. Clone the Template
 
 ```bash
-git clone [repository-url](https://github.com/amagdykhalil/clean-architecture-template.git)
+git clone https://github.com/amagdykhalil/clean-architecture-template.git
 cd clean-architecture-template
 ```
 
