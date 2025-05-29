@@ -18,15 +18,6 @@ namespace SolutionName.Persistence
         {
             this.mediator = mediator;
         }
-        public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
-        {
-
-            int result = await base.SaveChangesAsync(cancellationToken);
-
-            await mediator.DispatchDomainEventsAsync(this);
-
-            return result;
-        }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {

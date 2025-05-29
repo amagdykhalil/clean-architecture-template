@@ -27,7 +27,6 @@ This is a .NET-based clean architecture template that provides a solid foundatio
 - **Global Exception Handling** - Centralized exception handling with proper error responses
 - **Paginated Queries** - Base implementation for paginated data queries
 - **Email Service** - Ready-to-use email service with SMTP support
-- **Domain Events** - Full support for domain events
 - **Unit of Work and Repository Pattern** – Clean and testable data access layer those design patterns
 - **Soft Delete & Auditing** Fully configured and supported
 
