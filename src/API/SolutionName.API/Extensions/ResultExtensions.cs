@@ -1,59 +1,55 @@
-using SolutionName.Application.Models.Responses;
-
 namespace SolutionName.API.Extensions;
 
 internal static class ResultExtensions
 {
     /// <summary>
-    /// Converts an ApiResponse<object> object to an IActionResult.
+    /// Converts an Result object to an IActionResult.
     /// </summary>
-    /// <param name="response">The ApiResponse object to convert.</param>
+    /// <param name="result">The ApiResponse object to convert.</param>
     /// <returns>An IActionResult representing the ApiResponse object.</returns>
-    public static IActionResult ToActionResult(this ApiResponse<object> response)
+    public static IActionResult ToActionResult(this Result result)
     {
-        return response.StatusCode switch
+
+        return result.Status switch
         {
-            StatusCodes.Status200OK => new OkObjectResult(response),
-            StatusCodes.Status201Created => new ObjectResult(response)
-            {
-                StatusCode = StatusCodes.Status201Created
-            },
-            _ => response.ToHttpNonSuccessResult()
+            ResultStatus.Ok => new OkObjectResult(ApiResponse.Ok(result.SuccessMessage)),
+            ResultStatus.Created => new CreatedResult(
+                result.Location, ApiResponse.Created(result.SuccessMessage)),
+            _ => result.ToHttpNonSuccessResult()
         };
     }
 
 
     /// <summary>
-    /// Converts an ApiResponse{T} to an IActionResult.
+    /// Converts an Result{T} to an IActionResult.
     /// </summary>
     /// <typeparam name="T">The type of the result value.</typeparam>
-    /// <param name="response">The response to convert.</param>
-    /// <returns>An IActionResult representing the response.</returns>
-    public static IActionResult ToActionResult<T>(this ApiResponse<T> response)
+    /// <param name="response">The result to convert.</param>
+    /// <returns>An IActionResult representing the result.</returns>
+    public static IActionResult ToActionResult<T>(this Result<T> result)
     {
-        return response.StatusCode switch
+        return result.Status switch
         {
-            StatusCodes.Status200OK => new OkObjectResult(response),
-            StatusCodes.Status201Created => new ObjectResult(response)
-            {
-                StatusCode = StatusCodes.Status201Created
-            },
-            _ => response.ToHttpNonSuccessResult()
+            ResultStatus.Ok => new OkObjectResult(ApiResponse<T>.Ok(result.Value, result.SuccessMessage)),
+            ResultStatus.Created => new CreatedResult(
+                result.Location, ApiResponse<T>.Created(result.Value, result.SuccessMessage)),
+            _ => result.ToHttpNonSuccessResult()
         };
     }
 
 
-    private static IActionResult ToHttpNonSuccessResult<T>(this ApiResponse<T> response)
+    private static IActionResult ToHttpNonSuccessResult(this Ardalis.Result.IResult result)
     {
-        return response.StatusCode switch
+        var errors = result.Errors.Select(error => new ApiErrorResponse(error)).ToList();
+
+        return result.Status switch
         {
-            StatusCodes.Status400BadRequest => new BadRequestObjectResult(response),
-            StatusCodes.Status401Unauthorized => new UnauthorizedObjectResult(response),
-            StatusCodes.Status403Forbidden => new ForbidResult(),
-            StatusCodes.Status404NotFound => new NotFoundObjectResult(response),
-            StatusCodes.Status204NoContent => new ObjectResult(null) { StatusCode = StatusCodes.Status204NoContent },
-            StatusCodes.Status500InternalServerError => new ObjectResult(response) { StatusCode = StatusCodes.Status500InternalServerError },
-            _ => new BadRequestObjectResult(response)
+            ResultStatus.Error => new BadRequestObjectResult(ApiResponse.BadRequest(errors)),
+            ResultStatus.Unavailable => new UnauthorizedObjectResult(ApiResponse.Unauthorized(errors)),
+            ResultStatus.Forbidden => new ForbidResult(),
+            ResultStatus.NotFound => new NotFoundObjectResult(ApiResponse.NotFound(errors)),
+            ResultStatus.NoContent => new NoContentResult(),
+            _ => new BadRequestObjectResult(ApiResponse.BadRequest(errors)),
         };
     }
 }

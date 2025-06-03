@@ -1,5 +1,3 @@
-using SolutionName.Domain.Interfaces;
-
 namespace SolutionName.Domain.Abstract
 {
     public abstract class SoftDeletableEntity : Entity, ISoftDeleteable

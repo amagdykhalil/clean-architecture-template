@@ -1,5 +1,3 @@
-using SolutionName.Application.Common.Validator;
-using FluentValidation;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using SharpGrip.FluentValidation.AutoValidation.Mvc.Extensions;
@@ -25,7 +23,6 @@ namespace SolutionName.Application
                 config.EnableFormBindingSourceAutomaticValidation = true;
                 config.EnableQueryBindingSourceAutomaticValidation = true;
                 config.EnablePathBindingSourceAutomaticValidation = true;
-                config.OverrideDefaultResultFactoryWith<ValidationResultFactory>();
             });
 
             return services;

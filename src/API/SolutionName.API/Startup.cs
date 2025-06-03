@@ -1,7 +1,9 @@
 using Scalar.AspNetCore;
+using SharpGrip.FluentValidation.AutoValidation.Mvc.Results;
 using SolutionName.API.Extensions.Startup;
 using SolutionName.API.Middleware;
 using SolutionName.Application;
+using SolutionName.Application.Common.Validator;
 using SolutionName.Infrastructure;
 using SolutionName.Persistence;
 
@@ -29,10 +31,12 @@ namespace SolutionName.API
             services.AddProblemDetails();
             services.AddAuthorization();
 
+
             services.AddPersistence(_configuration)
                     .AddInfrastructure(_configuration)
                     .AddApplication(_configuration);
 
+            services.AddSingleton<IFluentValidationAutoValidationResultFactory, ValidationResultFactory>();
             services.AddOpenApi();
 
             CorsExtensions.AddCors(services, _configuration);

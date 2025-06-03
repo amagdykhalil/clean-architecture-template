@@ -38,7 +38,7 @@ namespace SolutionName.API.Controllers.V1
 
             if (response.IsSuccess)
             {
-                SetRefreshTokenCookie(response.Result.RefreshToken, response.Result.RefreshTokenExpiration);
+                SetRefreshTokenCookie(response.Value.RefreshToken, response.Value.RefreshTokenExpiration);
             }
 
             return response.ToActionResult();
@@ -62,7 +62,7 @@ namespace SolutionName.API.Controllers.V1
 
             if (response.IsSuccess)
             {
-                SetRefreshTokenCookie(response.Result.RefreshToken, response.Result.RefreshTokenExpiration);
+                SetRefreshTokenCookie(response.Value.RefreshToken, response.Value.RefreshTokenExpiration);
             }
 
             return response.ToActionResult();

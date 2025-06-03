@@ -2,25 +2,25 @@
 {
     public class RevokeTokenCommandHandler(IRefreshTokenRepository refreshTokenRepository, IUnitOfWork unitOfWork) : ICommandHandler<RevokeTokenCommand>
     {
-        public async Task<ApiResponse<object>> Handle(RevokeTokenCommand request, CancellationToken cancellationToken)
+        public async Task<Result> Handle(RevokeTokenCommand request, CancellationToken cancellationToken)
         {
             if (string.IsNullOrEmpty(request.Token))
             {
-                return NoContent();
+                return Result.NoContent();
             }
 
             var refreshToken = await refreshTokenRepository.GetAsync(request.Token);
 
             if (refreshToken is null || !refreshToken.IsActive)
             {
-                return NoContent();
+                return Result.NoContent();
             }
 
             // Revoke the token
             refreshToken.RevokedOn = DateTime.UtcNow;
             await unitOfWork.SaveChangesAsync();
 
-            return NoContent();
+            return Result.NoContent();
         }
     }
 }

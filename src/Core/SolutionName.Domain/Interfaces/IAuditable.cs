@@ -1,9 +1,7 @@
 namespace SolutionName.Domain.Interfaces
 {
-    public interface IAuditable
+    public interface IAuditable : ICreationTrackable
     {
-        DateTime CreatedAt { get; set; }
-        int CreatedBy { get; set; }
         DateTime? LastModifiedAt { get; set; }
         int? LastModifiedBy { get; set; }
     }

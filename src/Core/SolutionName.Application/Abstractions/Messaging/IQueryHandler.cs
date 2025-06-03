@@ -5,7 +5,7 @@ namespace Application.Abstractions.Messaging;
 /// </summary>
 /// <typeparam name="TQuery">The type of query to handle.</typeparam>
 public interface IQueryHandler<in TQuery>
-    : IRequestHandler<TQuery, ApiResponse<object>>
+    : IRequestHandler<TQuery, Result>
     where TQuery : IQuery;
 
 /// <summary>
@@ -14,7 +14,7 @@ public interface IQueryHandler<in TQuery>
 /// <typeparam name="TQuery">The type of query to handle.</typeparam>
 /// <typeparam name="TResponse">The type of response data returned by the query.</typeparam>
 public interface IQueryHandler<in TQuery, TResponse>
-    : IRequestHandler<TQuery, ApiResponse<TResponse>>
+    : IRequestHandler<TQuery, Result<TResponse>>
     where TQuery : IQuery<TResponse>;
 
 

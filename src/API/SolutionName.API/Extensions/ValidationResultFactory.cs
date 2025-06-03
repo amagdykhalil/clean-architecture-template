@@ -1,4 +1,3 @@
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using SharpGrip.FluentValidation.AutoValidation.Mvc.Results;
 
@@ -30,7 +29,7 @@ namespace SolutionName.Application.Common.Validator
                 .Select(kvp => new ApiErrorResponse($"{kvp.Key}: {kvp.Value}"))
                 .ToList();
 
-            var apiResponse = BadRequest(errorResponses);
+            var apiResponse = ApiResponse.BadRequest(errorResponses);
 
             return new ObjectResult(apiResponse)
             {

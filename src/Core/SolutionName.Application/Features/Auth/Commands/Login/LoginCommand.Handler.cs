@@ -10,14 +10,14 @@ namespace SolutionName.Application.Features.Auth.Commands.Login
         ILogger<LoginCommandHandler> logger)
         : ICommandHandler<LoginCommand, AuthDTO>
     {
-        public async Task<ApiResponse<AuthDTO>> Handle(LoginCommand request, CancellationToken cancellationToken)
+        public async Task<Result<AuthDTO>> Handle(LoginCommand request, CancellationToken cancellationToken)
         {
 
             var user = await identityService.GetUserAsync(request.Email, request.PasswordHash);
 
             if (user == null)
             {
-                return ApiResponse<AuthDTO>.BadRequest("Email or password is incorrect!");
+                return Result<AuthDTO>.Error("Email or password is incorrect!");
             }
 
             var accessToken = await tokenProvider.Create(user);
@@ -46,7 +46,7 @@ namespace SolutionName.Application.Features.Auth.Commands.Login
                 AuthInfo.RefreshTokenExpiration = refreshToken.ExpiresOn;
             }
 
-            return ApiResponse<AuthDTO>.Ok(AuthInfo);
+            return Result<AuthDTO>.Success(AuthInfo);
         }
     }
 }

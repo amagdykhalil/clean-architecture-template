@@ -9,18 +9,18 @@ namespace SolutionName.Application.Features.Auth.Commands.RefreshToken
         IUnitOfWork unitOfWork)
         : ICommandHandler<RefreshTokenCommand, AuthDTO>
     {
-        public async Task<ApiResponse<AuthDTO>> Handle(RefreshTokenCommand request, CancellationToken cancellationToken)
+        public async Task<Result<AuthDTO>> Handle(RefreshTokenCommand request, CancellationToken cancellationToken)
         {
             if (string.IsNullOrEmpty(request.Token))
             {
-                return ApiResponse<AuthDTO>.BadRequest("Invalid token");
+                return Result<AuthDTO>.Error("Invalid token");
             }
 
             var refreshToken = await refreshTokenRepository.GetWithUserAsync(request.Token);
 
             if (refreshToken is null || !refreshToken.IsActive)
             {
-                return ApiResponse<AuthDTO>.BadRequest("Invalid token");
+                return Result<AuthDTO>.Error("Invalid token");
             }
 
             // Revoke old token
@@ -43,7 +43,7 @@ namespace SolutionName.Application.Features.Auth.Commands.RefreshToken
 
             await unitOfWork.SaveChangesAsync();
 
-            return ApiResponse<AuthDTO>.Ok(authDto);
+            return Result<AuthDTO>.Success(authDto);
         }
     }
 }
