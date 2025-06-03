@@ -6,7 +6,7 @@ namespace SolutionName.Application.Contracts.Persistence.Base
     /// Generic repository interface that defines common database operations for entities.
     /// </summary>
     /// <typeparam name="Entity">The type of entity this repository handles.</typeparam>
-    public interface IGenericRepository<Entity> where Entity : class
+    public interface IGenericRepository<Entity> : IRepository where Entity : class
     {
         Task<Entity?> GetByIdAsync(int id);
         Task<List<Entity>> GetAllAsNoTracking();

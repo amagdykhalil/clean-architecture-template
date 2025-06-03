@@ -1,11 +1,11 @@
-using SolutionName.Persistence.Identity;
+
 
 namespace SolutionName.Application.Abstractions.Infrastructure
 {
     /// <summary>
     /// Interface for managing JWT token generation and validation.
     /// </summary>
-    public interface ITokenProvider
+    public interface ITokenProvider : IService
     {
         /// <summary>
         /// Creates a JWT access token for the specified user.

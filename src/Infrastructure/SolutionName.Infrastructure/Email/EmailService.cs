@@ -1,6 +1,6 @@
-using SolutionName.Application.Contracts;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using SolutionName.Application.Contracts;
 using System.Net;
 using System.Net.Mail;
 

@@ -1,5 +1,4 @@
 using Microsoft.AspNetCore.Identity;
-using SolutionName.Persistence.Identity;
 
 namespace SolutionName.Application.Abstractions.UserContext
 {
