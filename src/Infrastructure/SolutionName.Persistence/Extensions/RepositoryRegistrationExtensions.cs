@@ -1,5 +1,5 @@
-﻿using SolutionName.Application.Contracts.Persistence.Base;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
+using SolutionName.Application.Contracts.Persistence.Base;
 
 namespace SolutionName.Persistence.Extensions
 {
@@ -10,10 +10,6 @@ namespace SolutionName.Persistence.Extensions
             services.Scan(scan => scan
                  .FromAssembliesOf(typeof(PersistenceDependencyInjection))
                  .AddClasses(classes => classes.AssignableTo<IRepository>())
-                 .As((type) =>
-                     type.GetInterfaces()
-                         .Where(i => typeof(IRepository).IsAssignableFrom(i) && i != typeof(IRepository))
-                 )
                  .AsImplementedInterfaces()
                  .WithScopedLifetime()
              );

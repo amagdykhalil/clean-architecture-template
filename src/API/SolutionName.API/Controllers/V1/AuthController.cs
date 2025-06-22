@@ -1,16 +1,21 @@
 ﻿using SolutionName.Application.Features.Auth;
+using SolutionName.Application.Features.Auth.Commands.ConfirmEmail;
+using SolutionName.Application.Features.Auth.Commands.ForgotPassword;
 using SolutionName.Application.Features.Auth.Commands.Login;
 using SolutionName.Application.Features.Auth.Commands.RefreshToken;
+using SolutionName.Application.Features.Auth.Commands.ResendConfirmationEmail;
+using SolutionName.Application.Features.Auth.Commands.ResetPassword;
 using SolutionName.Application.Features.Auth.Commands.RevokeToken;
 
 namespace SolutionName.API.Controllers.V1
 {
     /// <summary>
-    /// Controller for handling authentication operations including login, token refresh, and token revocation.
+    /// Controller for handling authentication operations including login, token refresh, token revocation,
+    /// email confirmation, and password reset.
     /// </summary>
     [ApiController]
     [ApiVersion("1.0")]
-    [Route("api/Auth")]
+    [Route("api/auth")]
     public class AuthController : ControllerBase
     {
         private readonly IMediator _mediator;
@@ -34,6 +39,7 @@ namespace SolutionName.API.Controllers.V1
         [ApiResponse(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> Login([FromBody] LoginCommand command)
         {
+
             var response = await _mediator.Send(command);
 
             if (response.IsSuccess)
@@ -56,7 +62,7 @@ namespace SolutionName.API.Controllers.V1
         [ApiResponse(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> RefreshToken()
         {
-            var refreshToken = Request.Cookies[RefreshTokenCookieName];
+            var refreshToken = HttpContext.Request.Cookies[RefreshTokenCookieName];
             var command = new RefreshTokenCommand(refreshToken);
             var response = await _mediator.Send(command);
 
@@ -80,7 +86,69 @@ namespace SolutionName.API.Controllers.V1
             var command = new RevokeTokenCommand(refreshToken);
             var response = await _mediator.Send(command);
 
-            Response.Cookies.Delete(RefreshTokenCookieName);
+            HttpContext.Response.Cookies.Delete(RefreshTokenCookieName);
+            return response.ToActionResult();
+        }
+
+        /// <summary>
+        /// Confirms a user's email address using the provided confirmation code.
+        /// </summary>
+        /// <param name="userId">The user ID.</param>
+        /// <param name="code">The confirmation code.</param>
+        /// <param name="changedEmail">Optional new email address if changing email.</param>
+        /// <returns>Returns 200 OK on successful email confirmation.</returns>
+        [HttpGet("confirm-email")]
+        [ApiResponse(StatusCodes.Status200OK)]
+        [ApiResponse(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> ConfirmEmail(
+            [FromQuery] string userId,
+            [FromQuery] string code,
+            [FromQuery] string? changedEmail = null)
+        {
+            var command = new ConfirmEmailCommand(userId, code, changedEmail);
+            var response = await _mediator.Send(command);
+            return response.ToActionResult();
+        }
+
+        /// <summary>
+        /// Resends email confirmation to the specified email address.
+        /// </summary>
+        /// <param name="command">The resend confirmation email request.</param>
+        /// <returns>Returns 200 OK on successful email sending.</returns>
+        [HttpPost("resend-confirmation-email")]
+        [ApiResponse(StatusCodes.Status200OK)]
+        [ApiResponse(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> ResendConfirmationEmail([FromBody] ResendConfirmationEmailCommand command)
+        {
+            var response = await _mediator.Send(command);
+            return response.ToActionResult();
+        }
+
+        /// <summary>
+        /// Sends a password reset link to the specified email address.
+        /// </summary>
+        /// <param name="command">The forgot password request.</param>
+        /// <returns>Returns 200 OK on successful email sending.</returns>
+        [HttpPost("forgot-password")]
+        [ApiResponse(StatusCodes.Status200OK)]
+        [ApiResponse(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordCommand command)
+        {
+            var response = await _mediator.Send(command);
+            return response.ToActionResult();
+        }
+
+        /// <summary>
+        /// Resets a user's password using the provided reset code.
+        /// </summary>
+        /// <param name="command">The reset password request.</param>
+        /// <returns>Returns 200 OK on successful password reset.</returns>
+        [HttpPost("reset-password")]
+        [ApiResponse(StatusCodes.Status200OK)]
+        [ApiResponse(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordCommand command)
+        {
+            var response = await _mediator.Send(command);
             return response.ToActionResult();
         }
 
@@ -91,6 +159,7 @@ namespace SolutionName.API.Controllers.V1
         /// <param name="expiresOn">The expiration date of the token.</param>
         private void SetRefreshTokenCookie(string token, DateTime expiresOn)
         {
+
             var cookieOptions = new CookieOptions
             {
                 HttpOnly = true, // Prevents JavaScript access to the cookie
@@ -100,7 +169,8 @@ namespace SolutionName.API.Controllers.V1
                 Expires = expiresOn
             };
 
-            Response.Cookies.Append(RefreshTokenCookieName, token, cookieOptions);
+            HttpContext.Response.Cookies.Append(RefreshTokenCookieName, token, cookieOptions);
         }
     }
 }
+

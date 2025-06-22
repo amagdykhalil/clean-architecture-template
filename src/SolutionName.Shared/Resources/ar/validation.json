@@ -8,5 +8,6 @@
   "PasswordRequiresDigit": "يجب أن تحتوي كلمة المرور على رقم واحد على الأقل.",
   "PasswordRequiresUpper": "يجب أن تحتوي كلمة المرور على حرف كبير واحد على الأقل.",
   "PasswordRequiresLower": "يجب أن تحتوي كلمة المرور على حرف صغير واحد على الأقل.",
-  "PasswordRequiresNonAlphanumeric": "يجب أن تحتوي كلمة المرور على رمز خاص واحد على الأقل."
+  "PasswordRequiresNonAlphanumeric": "يجب أن تحتوي كلمة المرور على رمز خاص واحد على الأقل.",
+  "ResetCodeRequired": "رمز إعادة التعيين مطلوب"
 }

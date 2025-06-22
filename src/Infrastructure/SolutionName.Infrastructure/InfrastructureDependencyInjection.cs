@@ -1,11 +1,11 @@
+using SolutionName.Application.Abstractions.Services;
+using SolutionName.Infrastructure.Email;
 using Infrastructure.Authentication;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using SolutionName.Application.Abstractions.Infrastructure;
 using SolutionName.Application.Abstractions.Services;
 using SolutionName.Application.Abstractions.UserContext;
-using SolutionName.Application.Contracts;
 using SolutionName.Infrastructure.Authentication;
 using SolutionName.Infrastructure.Common.Services;
 using SolutionName.Infrastructure.Email;
@@ -21,8 +21,12 @@ namespace SolutionName.Infrastructure
 
             services.AddLocalizationSetup();
 
-            services.AddScoped<IEmailSender<User>, IdentityEmailSender>();
-            services.AddScoped<IEmailService, EmailService>();
+            // Email services
+            services.AddTransient<IEmailTemplate, EmailTemplate>();
+            services.AddTransient<IEmailSender, EmailSender>();
+            services.AddTransient<IEmailService, EmailService>();
+            services.AddTransient<IUserEmailService, UserEmailService>();
+
             services.AddScoped<IUserContext, UserContext>();
             services.AddScoped<ITokenProvider, TokenProvider>();
             services.AddScoped<IDateTimeProvider, DateTimeProvider>();

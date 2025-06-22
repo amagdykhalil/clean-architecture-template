@@ -15,6 +15,7 @@
             public static string PasswordRequiresLower { get; private set; }
             public static string PasswordRequiresNonAlphanumeric { get; private set; }
             public static string PasswordTooLong { get; private set; }
+            public static string ResetCodeRequired { get; private set; }
         }
     }
 }

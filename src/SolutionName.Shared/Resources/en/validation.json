@@ -8,5 +8,6 @@
   "PasswordRequiresDigit": "Password must contain at least one digit.",
   "PasswordRequiresUpper": "Password must contain at least one uppercase letter.",
   "PasswordRequiresLower": "Password must contain at least one lowercase letter.",
-  "PasswordRequiresNonAlphanumeric": "Password must contain at least one special character."
+  "PasswordRequiresNonAlphanumeric": "Password must contain at least one special character.",
+  "ResetCodeRequired": "Reset code is required"
 }

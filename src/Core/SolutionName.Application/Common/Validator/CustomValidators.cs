@@ -1,4 +1,4 @@
-namespace ARC.Application.Common.Validators
+namespace SolutionName.Application.Common.Validators
 {
     public static class CustomValidators
     {

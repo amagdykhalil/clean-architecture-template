@@ -69,6 +69,59 @@ namespace SolutionName.Persistence.Identity
         {
             return await _userManager.CreateAsync(user, password);
         }
+
+        // Email confirmation methods
+        public async Task<User?> FindByIdAsync(string userId)
+        {
+            return await _userManager.FindByIdAsync(userId);
+        }
+
+        public async Task<User?> FindByEmailAsync(string email)
+        {
+            return await _userManager.FindByEmailAsync(email);
+        }
+
+        public async Task<bool> IsEmailConfirmedAsync(User user)
+        {
+            return await _userManager.IsEmailConfirmedAsync(user);
+        }
+
+        public async Task<IdentityResult> ConfirmEmailAsync(User user, string code)
+        {
+            return await _userManager.ConfirmEmailAsync(user, code);
+        }
+
+        public async Task<IdentityResult> ChangeEmailAsync(User user, string newEmail, string code)
+        {
+            return await _userManager.ChangeEmailAsync(user, newEmail, code);
+        }
+
+        public async Task<IdentityResult> SetUserNameAsync(User user, string userName)
+        {
+            return await _userManager.SetUserNameAsync(user, userName);
+        }
+
+        public async Task<string> GenerateEmailConfirmationTokenAsync(User user)
+        {
+            return await _userManager.GenerateEmailConfirmationTokenAsync(user);
+        }
+
+        public async Task<string> GenerateChangeEmailTokenAsync(User user, string newEmail)
+        {
+            return await _userManager.GenerateChangeEmailTokenAsync(user, newEmail);
+        }
+
+        // Password reset methods
+        public async Task<string> GeneratePasswordResetTokenAsync(User user)
+        {
+            return await _userManager.GeneratePasswordResetTokenAsync(user);
+        }
+
+        public async Task<IdentityResult> ResetPasswordAsync(User user, string code, string newPassword)
+        {
+
+            return await _userManager.ResetPasswordAsync(user, code, newPassword);
+        }
     }
 }
 
