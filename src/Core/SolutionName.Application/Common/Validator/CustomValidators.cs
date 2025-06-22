@@ -1,31 +1,26 @@
-using FluentValidation;
-using System.Numerics;
-
-namespace SolutionName.Application.Common.Validators
+namespace ARC.Application.Common.Validators
 {
     public static class CustomValidators
     {
-        // Extension for numeric types
         public static IRuleBuilderOptions<T, TProperty> GreaterThanZero<T, TProperty>(
-        this IRuleBuilder<T, TProperty> ruleBuilder)
-        where TProperty : INumber<TProperty>
+            this IRuleBuilder<T, TProperty> ruleBuilder,
+            IStringLocalizer localizer)
+            where TProperty : System.Numerics.INumber<TProperty>
         {
             return ruleBuilder
                 .GreaterThan(TProperty.Zero)
-                .WithMessage("{PropertyName} must be greater than 0.");
+                .WithMessage(x => localizer[LocalizationKeys.Validation.MustBeGreaterThanZero, "{PropertyName}"]);
         }
 
-        // Extension for nullable numeric types
         public static IRuleBuilderOptions<T, TProperty?> GreaterThanZero<T, TProperty>(
-            this IRuleBuilder<T, TProperty?> ruleBuilder)
-            where TProperty : struct, INumber<TProperty>
+            this IRuleBuilder<T, TProperty?> ruleBuilder,
+            IStringLocalizer localizer)
+            where TProperty : struct, System.Numerics.INumber<TProperty>
         {
             return ruleBuilder
                 .GreaterThan(TProperty.Zero)
-                .WithMessage("{PropertyName} must be greater than 0.")
+                .WithMessage(x => localizer[LocalizationKeys.Validation.MustBeGreaterThanZero, "{PropertyName}"])
                 .When(x => x != null);
         }
     }
 }
-
-

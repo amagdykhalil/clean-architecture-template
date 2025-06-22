@@ -3,7 +3,7 @@ namespace SolutionName.API.Extensions.Startup
     public static class CorsExtensions
     {
         public static string AllowsOrigins => "AllowSpicificOrigin";
-        public static void AddCors(IServiceCollection services, IConfiguration configuration)
+        public static void AddCors(this IServiceCollection services, IConfiguration configuration)
         {
             var allowedOrigins = configuration.GetSection("AllowedOrigins").Get<string[]>();
 

@@ -2,6 +2,8 @@ using FluentValidation;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Localization;
+using SolutionName.Shared.Keys;
 using System.Net;
 using System.Text.Json;
 
@@ -10,10 +12,12 @@ namespace SolutionName.API.Middleware
     public class GlobalExceptionHandler : IExceptionHandler
     {
         private readonly ILogger<GlobalExceptionHandler> _logger;
+        private readonly IStringLocalizer<GlobalExceptionHandler> _localizer;
 
-        public GlobalExceptionHandler(ILogger<GlobalExceptionHandler> logger)
+        public GlobalExceptionHandler(ILogger<GlobalExceptionHandler> logger, IStringLocalizer<GlobalExceptionHandler> localizer)
         {
             _logger = logger;
+            _localizer = localizer;
         }
 
         public async ValueTask<bool> TryHandleAsync(HttpContext httpContext, Exception exception, CancellationToken cancellationToken)
@@ -47,36 +51,37 @@ namespace SolutionName.API.Middleware
             return true;
         }
 
-        private static ApiResponse HandleValidationException(ValidationException ex)
+        private ApiResponse HandleValidationException(ValidationException ex)
         {
             var errors = ex.Errors
                 .Select(e => new ApiErrorResponse(e.ErrorMessage))
                 .ToList();
 
+            // Optionally, you could use a localized summary message here
             return ApiResponse.BadRequest(errors);
         }
 
-        private static ApiResponse HandleUnauthorizedException()
+        private ApiResponse HandleUnauthorizedException()
         {
             return ApiResponse.Unauthorized(new List<ApiErrorResponse>
             {
-                new("You are not authorized to access this resource.")
+                new(_localizer[LocalizationKeys.GlobalException.Unauthorized])
             });
         }
 
-        private static ApiResponse HandleNotFoundException()
+        private ApiResponse HandleNotFoundException()
         {
             return ApiResponse.NotFound(new List<ApiErrorResponse>
             {
-                new("The requested resource was not found.")
+                new(_localizer[LocalizationKeys.GlobalException.NotFound])
             });
         }
 
-        private static ApiResponse HandleBadRequest(Exception ex)
+        private ApiResponse HandleBadRequest(Exception ex)
         {
             return ApiResponse.BadRequest(new List<ApiErrorResponse>
             {
-                new(ex.Message)
+                new(_localizer[LocalizationKeys.GlobalException.BadRequest, ex.Message])
             });
         }
 
@@ -86,7 +91,7 @@ namespace SolutionName.API.Middleware
 
             return ApiResponse.InternalServerError(new List<ApiErrorResponse>
             {
-                new("A database error occurred. Please try again later.")
+                new(_localizer[LocalizationKeys.GlobalException.DbError])
             });
         }
 
@@ -96,11 +101,11 @@ namespace SolutionName.API.Middleware
 
             var (statusCode, message) = sqlEx.Number switch
             {
-                2627 or 2601 => (HttpStatusCode.Conflict, "Resource already exists."), // Unique constraint violation
-                547 => (HttpStatusCode.BadRequest, "Cannot delete resource because it’s referenced elsewhere."), // FK violation
-                1205 => (HttpStatusCode.Conflict, "Request failed due to a database conflict. Please retry."), // Deadlock
-                515 => (HttpStatusCode.BadRequest, "Missing required data: a field was left empty."), // Not null violation
-                _ => (HttpStatusCode.InternalServerError, "A database error occurred. Please contact support.") // Fallback
+                2627 or 2601 => (HttpStatusCode.Conflict, _localizer[LocalizationKeys.GlobalException.SqlConflict]), // Unique constraint violation
+                547 => (HttpStatusCode.BadRequest, _localizer[LocalizationKeys.GlobalException.SqlFK]), // FK violation
+                1205 => (HttpStatusCode.Conflict, _localizer[LocalizationKeys.GlobalException.SqlDeadlock]), // Deadlock
+                515 => (HttpStatusCode.BadRequest, _localizer[LocalizationKeys.GlobalException.SqlNotNull]), // Not null violation
+                _ => (HttpStatusCode.InternalServerError, _localizer[LocalizationKeys.GlobalException.SqlFallback]) // Fallback
             };
 
             return new ApiResponse(false, "", (int)statusCode, new List<ApiErrorResponse>
@@ -109,17 +114,17 @@ namespace SolutionName.API.Middleware
             });
         }
 
-
         private ApiResponse HandleInternalError(Exception ex)
         {
             _logger.LogError(ex, "Unhandled internal exception.");
 
             return ApiResponse.InternalServerError(new List<ApiErrorResponse>
             {
-                new("An internal server error occurred. Please try again later.")
+                new(_localizer[LocalizationKeys.GlobalException.Internal])
             });
         }
     }
 }
+
 
 

@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Identity;
 using SolutionName.Application.Abstractions.UserContext;
+using SolutionName.Domain.Entities;
 
 namespace SolutionName.Persistence.Identity
 {
@@ -59,12 +60,17 @@ namespace SolutionName.Persistence.Identity
         public async Task<IdentityResult> ValidatePasswordAsync(string password)
         {
             // We pass null as the user because we only care about the rules,
-            // not whether it matches an existing user�s password.
+            // not whether it matches an existing user's password.
             return await _userManager.PasswordValidators[0]
                           .ValidateAsync(_userManager, null!, password);
         }
 
+        public async Task<IdentityResult> CreateUserAsync(User user, string password)
+        {
+            return await _userManager.CreateAsync(user, password);
+        }
     }
 }
+
 
 

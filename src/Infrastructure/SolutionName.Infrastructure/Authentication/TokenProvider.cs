@@ -1,9 +1,9 @@
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using SolutionName.Application.Abstractions.Infrastructure;
+using SolutionName.Application.Abstractions.Services;
 using SolutionName.Application.Abstractions.UserContext;
 using SolutionName.Infrastructure.Authentication;
-using SolutionName.Persistence.Identity;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
@@ -13,14 +13,16 @@ namespace Infrastructure.Authentication;
 /// <summary>
 /// Implementation of ITokenProvider that generates and manages JWT tokens.
 /// </summary>
-internal sealed class TokenProvider : ITokenProvider
+public sealed class TokenProvider : ITokenProvider
 {
     private readonly JWTSettings _jwtSetting;
     private readonly IIdentityService _identityService;
-    public TokenProvider(IOptions<JWTSettings> jwtSettingOptions, IIdentityService identityService)
+    private readonly IDateTimeProvider _dateTimeProvider;
+    public TokenProvider(IOptions<JWTSettings> jwtSettingOptions, IIdentityService identityService, IDateTimeProvider dateTimeProvider = null)
     {
         _jwtSetting = jwtSettingOptions.Value;
         _identityService = identityService;
+        _dateTimeProvider = dateTimeProvider;
     }
 
     public async Task<string> Create(User user)
@@ -30,8 +32,8 @@ internal sealed class TokenProvider : ITokenProvider
         var claims = new List<Claim>
         {
             new(ClaimTypes.NameIdentifier, user.Id.ToString()),
-            //new Claim(JwtRegisteredClaimNames.GivenName, user.Person.FirstName),
-            //new Claim(JwtRegisteredClaimNames.FamilyName, user.Person.LastName),
+            new Claim(JwtRegisteredClaimNames.GivenName, user.Person.FirstName),
+            new Claim(JwtRegisteredClaimNames.FamilyName, user.Person.LastName),
             new(ClaimTypes.Email, user.Email)
         };
         claims.AddRange(roles.Select(r => new Claim(ClaimTypes.Role, r)));
@@ -41,8 +43,8 @@ internal sealed class TokenProvider : ITokenProvider
         {
             Issuer = _jwtSetting.Issuer,
             Audience = _jwtSetting.Audience,
-            IssuedAt = DateTime.UtcNow,
-            Expires = DateTime.UtcNow.AddMinutes(_jwtSetting.AccessTokenExpirationMinutes),
+            IssuedAt = _dateTimeProvider.UtcNow,
+            Expires = _dateTimeProvider.UtcNow.AddMinutes(_jwtSetting.AccessTokenExpirationMinutes),
             SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSetting.Secret)), SecurityAlgorithms.HmacSha256),
             Subject = new ClaimsIdentity(claims)
         };
@@ -59,8 +61,9 @@ internal sealed class TokenProvider : ITokenProvider
     /// <returns>The DateTime when the token will expire.</returns>
     public DateTime GetAccessTokenExpiration()
     {
-        return DateTime.UtcNow.AddMinutes(_jwtSetting.AccessTokenExpirationMinutes);
+        return _dateTimeProvider.UtcNow.AddMinutes(_jwtSetting.AccessTokenExpirationMinutes);
     }
 }
+
 
 

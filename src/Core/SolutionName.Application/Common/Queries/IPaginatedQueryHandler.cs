@@ -9,7 +9,7 @@ namespace SolutionName.Application.Common.Queries
     /// <typeparam name="TQuery">The type of query to handle.</typeparam>
     /// <typeparam name="TData">The type of data in the paginated result.</typeparam>
     public interface IPaginatedQueryHandler<TQuery, TData>
-        : IQueryHandler<TQuery, SolutionName.Application.Common.Models.PagedResult<TData>>
+        : IQueryHandler<TQuery, Models.PagedResult<TData>>
         where TQuery : IPaginatedQuery<TData>
     { }
 

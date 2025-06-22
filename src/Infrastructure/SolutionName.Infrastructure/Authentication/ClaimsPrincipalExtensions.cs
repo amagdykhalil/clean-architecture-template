@@ -5,7 +5,7 @@ namespace Infrastructure.Authentication;
 /// <summary>
 /// Extension methods for working with ClaimsPrincipal objects.
 /// </summary>
-internal static class ClaimsPrincipalExtensions
+public static class ClaimsPrincipalExtensions
 {
     /// <summary>
     /// Gets the user ID from the claims principal.

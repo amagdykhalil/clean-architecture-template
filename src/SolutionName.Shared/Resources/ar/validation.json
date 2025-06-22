@@ -1,0 +1,12 @@
+{
+  "EmailRequired": "البريد الإلكتروني مطلوب",
+  "PasswordRequired": "الرقم السري مطلوب",
+  "InvalidEmail": "الرجاء إدخال بريد إلكتروني صحيح",
+  "MustBeGreaterThanZero": "{0} يجب أن يكون أكبر من 0.",
+  "PasswordTooShort": "يجب أن تتكون كلمة المرور من {0} أحرف على الأقل.",
+  "PasswordTooLong": "يجب ألا تتجاوز كلمة المرور {0} حرفًا.",
+  "PasswordRequiresDigit": "يجب أن تحتوي كلمة المرور على رقم واحد على الأقل.",
+  "PasswordRequiresUpper": "يجب أن تحتوي كلمة المرور على حرف كبير واحد على الأقل.",
+  "PasswordRequiresLower": "يجب أن تحتوي كلمة المرور على حرف صغير واحد على الأقل.",
+  "PasswordRequiresNonAlphanumeric": "يجب أن تحتوي كلمة المرور على رمز خاص واحد على الأقل."
+}

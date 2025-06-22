@@ -1,0 +1,13 @@
+{
+  "ValidationError": "Validation failed.",
+  "Unauthorized": "You are not authorized to access this resource.",
+  "NotFound": "The requested resource was not found.",
+  "BadRequest": "{0}",
+  "DbError": "A database error occurred. Please try again later.",
+  "SqlConflict": "Resource already exists.",
+  "SqlFK": "Cannot delete resource because it is referenced elsewhere.",
+  "SqlDeadlock": "Request failed due to a database conflict. Please retry.",
+  "SqlNotNull": "Missing required data: a field was left empty.",
+  "SqlFallback": "A database error occurred. Please contact support.",
+  "Internal": "An internal server error occurred. Please try again later."
+}

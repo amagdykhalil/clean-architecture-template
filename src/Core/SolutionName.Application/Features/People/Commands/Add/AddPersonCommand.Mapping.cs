@@ -1,4 +1,6 @@
-﻿namespace SolutionName.Application.Features.People.Commands.Add
+﻿using SolutionName.Persistence.Entities;
+
+namespace SolutionName.Application.Features.People.Commands.Add
 {
     /// <summary>
     /// Extension methods for mapping from and to Person entity.

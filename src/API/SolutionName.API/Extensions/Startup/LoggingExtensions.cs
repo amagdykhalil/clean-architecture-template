@@ -4,7 +4,7 @@ namespace SolutionName.API.Extensions.Startup
 {
     public static class LoggingExtensions
     {
-        public static void UseLogging(WebApplicationBuilder builder)
+        public static void ConfigureLogging(this WebApplicationBuilder builder)
         {
             builder.Host.UseSerilog((context, loggerConfig) =>
             loggerConfig.ReadFrom.Configuration(context.Configuration));

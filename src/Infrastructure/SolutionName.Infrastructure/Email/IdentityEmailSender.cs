@@ -1,8 +1,7 @@
 // Services/EmailSender.cs
-using SolutionName.Application.Contracts;
-using SolutionName.Persistence.Identity;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
+using SolutionName.Application.Contracts;
 
 public class IdentityEmailSender : IEmailSender<User>
 {

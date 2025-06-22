@@ -1,6 +1,6 @@
 namespace SolutionName.Application.Contracts
 {
-    public interface IEmailService : IService
+    public interface IEmailService
     {
         Task SendEmailAsync(string toEmail, string subject, string body, bool isHtmlMessage = true);
     }

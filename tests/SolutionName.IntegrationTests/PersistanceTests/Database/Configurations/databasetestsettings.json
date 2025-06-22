@@ -1,0 +1,15 @@
+{
+  "Database": {
+    "Port": 61510,
+    "Password": "yourStrong(!)Password",
+    "DatabaseName": "SolutionNameTestDb"
+  },
+  "RefreshToken": {
+    "ExpirationDays": 7
+  },
+  "Logging": {
+    "LogLevel": {
+      "Default": "Warning"
+    }
+  }
+} 

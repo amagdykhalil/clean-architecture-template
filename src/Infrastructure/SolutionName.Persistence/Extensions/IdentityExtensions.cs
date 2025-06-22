@@ -1,12 +1,12 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
-using SolutionName.Persistence.Identity;
+using SolutionName.Domain.Entities;
 
 namespace SolutionName.Persistence.Extensions
 {
-    public class IdentityExtensions
+    public static class IdentityExtensions
     {
-        public static void AddIdentity(IServiceCollection services)
+        public static void AddAppIdentity(this IServiceCollection services)
         {
             services.AddIdentity<User, IdentityRole<int>>(options =>
             {

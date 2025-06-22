@@ -2,9 +2,9 @@ using Azure.Identity;
 
 namespace SolutionName.API.Extensions.Startup
 {
-    public class AzureKeyVaultExtensions
+    public static class AzureKeyVaultExtensions
     {
-        public static void UseAzureKeyVault(WebApplicationBuilder builder)
+        public static void ConfigureAzureKeyVault(this WebApplicationBuilder builder)
         {
             var vaultName = builder.Configuration["KeyVault:VaultName"];
             if (string.IsNullOrEmpty(vaultName))

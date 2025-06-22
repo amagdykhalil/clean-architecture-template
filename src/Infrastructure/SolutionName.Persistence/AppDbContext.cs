@@ -1,23 +1,19 @@
-using MediatR;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using SolutionName.Domain.Entities;
-using SolutionName.Persistence.Extensions;
-using SolutionName.Persistence.Identity;
 
 namespace SolutionName.Persistence
 {
     public class AppDbContext
         : IdentityDbContext<User, IdentityRole<int>, int, IdentityUserClaim<int>, IdentityUserRole<int>, IdentityUserLogin<int>, IdentityRoleClaim<int>, IdentityUserToken<int>>
     {
+        public AppDbContext(DbContextOptions<AppDbContext> options)
+: base(options)
+        {
+        }
+
         public DbSet<Person> People { get; set; }
         public DbSet<RefreshToken> RefreshTokens { get; set; }
-
-        private readonly IMediator mediator;
-        public AppDbContext(DbContextOptions<AppDbContext> options, IMediator mediator) : base(options)
-        {
-            this.mediator = mediator;
-        }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {

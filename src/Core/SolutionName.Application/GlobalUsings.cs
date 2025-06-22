@@ -2,12 +2,13 @@
 global using Ardalis.Result;
 global using FluentValidation;
 global using MediatR;
+global using Microsoft.Extensions.Localization;
+global using Microsoft.Extensions.Logging;
 global using SolutionName.Application.Abstractions.Infrastructure;
+global using SolutionName.Application.Abstractions.Services;
 global using SolutionName.Application.Abstractions.UserContext;
-global using SolutionName.Application.Contracts;
 global using SolutionName.Application.Contracts.Persistence;
 global using SolutionName.Application.Contracts.Persistence.Base;
 global using SolutionName.Application.Contracts.Persistence.UoW;
-global using SolutionName.Persistence.Entities;
-global using SolutionName.Persistence.Identity;
-
+global using SolutionName.Domain.Entities;
+global using SolutionName.Shared.Keys;

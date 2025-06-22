@@ -1,6 +1,12 @@
-﻿namespace SolutionName.Application.Features.Auth.Commands.RevokeToken
+﻿using SolutionName.Application.Features.Auth.Commands.RevokeToken;
+
+namespace SolutionName.Application.Features.Auth.Commands.RevokeToken
 {
-    public class RevokeTokenCommandHandler(IRefreshTokenRepository refreshTokenRepository, IUnitOfWork unitOfWork) : ICommandHandler<RevokeTokenCommand>
+    public class RevokeTokenCommandHandler(
+        IRefreshTokenRepository refreshTokenRepository,
+        IUnitOfWork unitOfWork,
+        IDateTimeProvider dateTimeProvider)
+        : ICommandHandler<RevokeTokenCommand>
     {
         public async Task<Result> Handle(RevokeTokenCommand request, CancellationToken cancellationToken)
         {
@@ -17,10 +23,11 @@
             }
 
             // Revoke the token
-            refreshToken.RevokedOn = DateTime.UtcNow;
+            refreshToken.RevokedOn = dateTimeProvider.UtcNow;
             await unitOfWork.SaveChangesAsync();
 
             return Result.NoContent();
         }
     }
 }
+

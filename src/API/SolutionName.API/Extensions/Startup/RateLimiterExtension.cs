@@ -6,7 +6,7 @@ namespace SolutionName.API.Extensions.Startup
 {
     public static class RateLimiterExtension
     {
-        public static void AddRateLimiter(IServiceCollection services)
+        public static void AddGlobalRateLimiter(this IServiceCollection services)
         {
             services.AddRateLimiter(options =>
             {

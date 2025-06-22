@@ -1,48 +1,57 @@
-using SolutionName.Application.Abstractions.UserContext;
-using FluentValidation;
 using FluentValidation.Validators;
 
-namespace SolutionName.Application.Common.Validators
+public class PasswordValidator<T> : AsyncPropertyValidator<T, string>
+    where T : class
 {
-    /// <summary>
-    /// Custom validator for password fields that integrates with the identity service.
-    /// </summary>
-    /// <typeparam name="T">The type of the object being validated.</typeparam>
-    public class PasswordValidator<T>
-         : AsyncPropertyValidator<T, string>
-           where T : class
+    private const int MaxPasswordLength = 20;
+    private readonly IIdentityService _identityService;
+    private readonly IStringLocalizer _localizer;
+
+    public PasswordValidator(IIdentityService identityService, IStringLocalizer localizer)
     {
-        private readonly IIdentityService _identityService;
+        _identityService = identityService;
+        _localizer = localizer;
+    }
 
-        public PasswordValidator(IIdentityService identityService)
+    public override string Name => "PasswordValidator";
+
+    public override async Task<bool> IsValidAsync(
+        ValidationContext<T> context,
+        string value,
+        CancellationToken cancellation)
+    {
+        // Check max length first
+        if (!string.IsNullOrEmpty(value) && value.Length > MaxPasswordLength)
         {
-            _identityService = identityService;
+            var message = _localizer[LocalizationKeys.Validation.PasswordTooLong, MaxPasswordLength];
+            context.AddFailure(message);
+            return false;
         }
 
-        public override string Name => "PasswordValidator";
+        var validationResult = await _identityService.ValidatePasswordAsync(value);
 
-        public override async Task<bool> IsValidAsync(
-            ValidationContext<T> context,
-            string value,
-            CancellationToken cancellation)
+        if (!validationResult.Succeeded)
         {
-            var validationResult = await _identityService
-                                         .ValidatePasswordAsync(value);
-
-            if (!validationResult.Succeeded)
-            {
-                // report the first failure message
-                context.AddFailure(
-                    validationResult.Errors
-                                    .First()
-                                    .Description
-                );
-                return false;
-            }
-
-            return true;
+            var error = validationResult.Errors.First();
+            var message = GetLocalizationMessage(error.Code, _localizer);
+            context.AddFailure(message);
+            return false;
         }
+
+        return true;
+    }
+
+    private string GetLocalizationMessage(string errorCode, IStringLocalizer localizer)
+    {
+        return errorCode switch
+        {
+            "PasswordTooShort" => localizer[LocalizationKeys.Validation.PasswordTooShort, 8],
+            "PasswordRequiresDigit" => localizer[LocalizationKeys.Validation.PasswordRequiresDigit],
+            "PasswordRequiresUpper" => localizer[LocalizationKeys.Validation.PasswordRequiresUpper],
+            "PasswordRequiresLower" => localizer[LocalizationKeys.Validation.PasswordRequiresLower],
+            "PasswordRequiresNonAlphanumeric" => localizer[LocalizationKeys.Validation.PasswordRequiresNonAlphanumeric],
+            "PasswordTooLong" => localizer[LocalizationKeys.Validation.PasswordTooLong, MaxPasswordLength],
+            _ => errorCode // fallback
+        };
     }
 }
-
-

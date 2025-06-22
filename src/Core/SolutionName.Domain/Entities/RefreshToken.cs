@@ -1,6 +1,3 @@
-using SolutionName.Domain.Abstract;
-using SolutionName.Persistence.Identity;
-
 namespace SolutionName.Domain.Entities
 {
     public class RefreshToken : Entity

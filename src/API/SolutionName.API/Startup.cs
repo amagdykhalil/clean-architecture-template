@@ -5,6 +5,7 @@ using SolutionName.API.Middleware;
 using SolutionName.Application;
 using SolutionName.Application.Common.Validator;
 using SolutionName.Infrastructure;
+using SolutionName.Infrastructure.Localization;
 using SolutionName.Persistence;
 
 namespace SolutionName.API
@@ -19,17 +20,19 @@ namespace SolutionName.API
         }
         public void ConfigureBuilder(WebApplicationBuilder builder)
         {
-            LoggingExtensions.UseLogging(builder);
-            AzureKeyVaultExtensions.UseAzureKeyVault(builder);
+            builder.ConfigureLogging();
+            builder.ConfigureAzureKeyVault();
         }
         public void ConfigureServices(IServiceCollection services)
         {
-
             services.AddControllers();
             services.AddExceptionHandler<GlobalExceptionHandler>();
 
+            services.AddCors(_configuration);
+
             services.AddProblemDetails();
             services.AddAuthorization();
+            services.AddDistributedMemoryCache();
 
 
             services.AddPersistence(_configuration)
@@ -39,9 +42,8 @@ namespace SolutionName.API
             services.AddSingleton<IFluentValidationAutoValidationResultFactory, ValidationResultFactory>();
             services.AddOpenApi();
 
-            CorsExtensions.AddCors(services, _configuration);
-            APIVersioningExtentions.AddAPIVersioning(services);
-            RateLimiterExtension.AddRateLimiter(services);
+            services.AddApiVersioning();
+            services.AddGlobalRateLimiter();
         }
         public void Configure(WebApplication app)
         {
@@ -64,6 +66,7 @@ namespace SolutionName.API
             app.UseAuthentication();
             app.UseAuthorization();
             app.UseCors(CorsExtensions.AllowsOrigins);
+            app.UseRequestCulture();
 
             app.MapControllers();
         }

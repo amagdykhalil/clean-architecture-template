@@ -95,6 +95,7 @@ namespace SolutionName.API.Controllers.V1
             {
                 HttpOnly = true, // Prevents JavaScript access to the cookie
                 Secure = true,   // Only sent over HTTPS
+                IsEssential = true,
                 SameSite = SameSiteMode.None, // Allows cross-site requests
                 Expires = expiresOn
             };

@@ -1,0 +1,12 @@
+{
+  "EmailRequired": "Email is required",
+  "PasswordRequired": "Password is required",
+  "InvalidEmail": "Please enter a valid email address",
+  "MustBeGreaterThanZero": "{0} must be greater than 0.",
+  "PasswordTooShort": "Password must be at least {0} characters.",
+  "PasswordTooLong": "Password must not exceed {0} characters.",
+  "PasswordRequiresDigit": "Password must contain at least one digit.",
+  "PasswordRequiresUpper": "Password must contain at least one uppercase letter.",
+  "PasswordRequiresLower": "Password must contain at least one lowercase letter.",
+  "PasswordRequiresNonAlphanumeric": "Password must contain at least one special character."
+}

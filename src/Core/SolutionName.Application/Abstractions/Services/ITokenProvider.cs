@@ -5,7 +5,7 @@ namespace SolutionName.Application.Abstractions.Infrastructure
     /// <summary>
     /// Interface for managing JWT token generation and validation.
     /// </summary>
-    public interface ITokenProvider : IService
+    public interface ITokenProvider
     {
         /// <summary>
         /// Creates a JWT access token for the specified user.

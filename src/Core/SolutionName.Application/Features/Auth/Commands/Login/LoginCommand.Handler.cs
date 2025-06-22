@@ -1,4 +1,9 @@
-﻿using Microsoft.Extensions.Logging;
+﻿
+
+using Microsoft.Extensions.Localization;
+using Microsoft.Extensions.Logging;
+using SolutionName.Application.Features.Auth;
+using SolutionName.Application.Features.Auth.Commands.Login;
 
 namespace SolutionName.Application.Features.Auth.Commands.Login
 {
@@ -7,17 +12,17 @@ namespace SolutionName.Application.Features.Auth.Commands.Login
         ITokenProvider tokenProvider,
         IRefreshTokenRepository refreshTokenRepository,
         IUnitOfWork unitOfWork,
-        ILogger<LoginCommandHandler> logger)
+        ILogger<LoginCommandHandler> logger,
+        IStringLocalizer<LoginCommandHandler> localizer)
         : ICommandHandler<LoginCommand, AuthDTO>
     {
         public async Task<Result<AuthDTO>> Handle(LoginCommand request, CancellationToken cancellationToken)
         {
-
-            var user = await identityService.GetUserAsync(request.Email, request.PasswordHash);
+            var user = await identityService.GetUserAsync(request.Email, request.Password);
 
             if (user == null)
             {
-                return Result<AuthDTO>.Error("Email or password is incorrect!");
+                return Result<AuthDTO>.Error(localizer[LocalizationKeys.Auth.InvalidCredentials]);
             }
 
             var accessToken = await tokenProvider.Create(user);
@@ -27,7 +32,6 @@ namespace SolutionName.Application.Features.Auth.Commands.Login
                 UserId = user.Id,
                 ExpiresOn = tokenProvider.GetAccessTokenExpiration(),
             };
-
 
             var ActiveRefreshToken = await refreshTokenRepository.GetActiveRefreshTokenAsync(user.Id);
 
@@ -44,9 +48,12 @@ namespace SolutionName.Application.Features.Auth.Commands.Login
 
                 AuthInfo.RefreshToken = refreshToken.Token;
                 AuthInfo.RefreshTokenExpiration = refreshToken.ExpiresOn;
+
+                await unitOfWork.SaveChangesAsync();
             }
 
             return Result<AuthDTO>.Success(AuthInfo);
         }
     }
 }
+

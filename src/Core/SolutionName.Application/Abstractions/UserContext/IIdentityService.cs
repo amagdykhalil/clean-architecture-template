@@ -12,6 +12,7 @@ namespace SolutionName.Application.Abstractions.UserContext
         Task<IList<string>> GetRolesAsync(int userId);
         Task AddToRoleAsync(int userId, string role);
         Task<IdentityResult> ValidatePasswordAsync(string password);
+        Task<IdentityResult> CreateUserAsync(User user, string password);
     }
 }
 
