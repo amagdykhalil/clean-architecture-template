@@ -1,25 +1,21 @@
-using SolutionName.Application.Abstractions.UserContext;
+using SolutionName.Application.Common.Validator;
+using SolutionName.Application.Features.Auth.Common;
 
 namespace SolutionName.Application.Features.Auth.Commands.ResetPassword
 {
     public class ResetPasswordCommandValidator : AbstractValidator<ResetPasswordCommand>
     {
         public ResetPasswordCommandValidator(
-            IStringLocalizer<ResetPasswordCommandValidator> localizer,
             IIdentityService identityService)
         {
             RuleFor(r => r.Email)
-                .NotEmpty()
-                .WithMessage(localizer[LocalizationKeys.Validation.EmailRequired])
-                .EmailAddress()
-                .WithMessage(localizer[LocalizationKeys.Validation.InvalidEmail]);
+                .SetValidator(new CustomEmailValidator<ResetPasswordCommand>());
 
             RuleFor(r => r.ResetCode)
-                .NotEmpty()
-                .WithMessage(localizer[LocalizationKeys.Validation.ResetCodeRequired]);
+                .SetValidator(new CodeValidator<ResetPasswordCommand>());
 
             RuleFor(r => r.NewPassword)
-                .SetAsyncValidator(new PasswordValidator<ResetPasswordCommand>(identityService, localizer));
+                .SetAsyncValidator(new PasswordValidator<ResetPasswordCommand>(identityService));
         }
     }
-} 
+}

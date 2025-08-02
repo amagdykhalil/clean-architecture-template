@@ -27,31 +27,6 @@ namespace SolutionName.Application.Tests.Features.Auth.Commands
         }
 
         [Fact]
-        public async Task Handle_ValidActiveToken_RevokesTokenAndReturnsNoContent()
-        {
-            // Arrange
-            var command = new RevokeTokenCommand("valid-token");
-            var refreshToken = new RefreshToken
-            {
-                Token = command.Token,
-                UserId = 1,
-                ExpiresOn = DateTime.UtcNow.AddDays(7),
-                RevokedOn = null
-            };
-
-            _refreshTokenRepositoryMock.Setup(x => x.GetAsync(command.Token))
-                .ReturnsAsync(refreshToken);
-
-            // Act
-            var result = await _handler.Handle(command, CancellationToken.None);
-
-            // Assert
-            Assert.True(result.IsSuccess);
-            Assert.Equal(_utcNow, refreshToken.RevokedOn!.Value, TimeSpan.FromSeconds(1));
-            _unitOfWorkMock.Verify(x => x.SaveChangesAsync(CancellationToken.None), Times.Once);
-        }
-
-        [Fact]
         public async Task Handle_EmptyToken_ReturnsNoContent()
         {
             // Arrange
@@ -62,7 +37,22 @@ namespace SolutionName.Application.Tests.Features.Auth.Commands
 
             // Assert
             Assert.True(result.IsSuccess);
-            _refreshTokenRepositoryMock.Verify(x => x.GetAsync(It.IsAny<string>()), Times.Never);
+            _refreshTokenRepositoryMock.Verify(x => x.GetAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Never);
+            _unitOfWorkMock.Verify(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Never);
+        }
+
+        [Fact]
+        public async Task Handle_NullToken_ReturnsNoContent()
+        {
+            // Arrange
+            var command = new RevokeTokenCommand(null!);
+
+            // Act
+            var result = await _handler.Handle(command, CancellationToken.None);
+
+            // Assert
+            Assert.True(result.IsSuccess);
+            _refreshTokenRepositoryMock.Verify(x => x.GetAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Never);
             _unitOfWorkMock.Verify(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Never);
         }
 
@@ -72,7 +62,7 @@ namespace SolutionName.Application.Tests.Features.Auth.Commands
             // Arrange
             var command = new RevokeTokenCommand("invalid-token");
 
-            _refreshTokenRepositoryMock.Setup(x => x.GetAsync(command.Token))
+            _refreshTokenRepositoryMock.Setup(x => x.GetAsync(command.Token, It.IsAny<CancellationToken>()))
                 .ReturnsAsync((RefreshToken?)null);
 
             // Act
@@ -96,7 +86,7 @@ namespace SolutionName.Application.Tests.Features.Auth.Commands
                 RevokedOn = DateTime.UtcNow.AddDays(-1)
             };
 
-            _refreshTokenRepositoryMock.Setup(x => x.GetAsync(command.Token))
+            _refreshTokenRepositoryMock.Setup(x => x.GetAsync(command.Token, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(refreshToken);
 
             // Act
@@ -105,6 +95,33 @@ namespace SolutionName.Application.Tests.Features.Auth.Commands
             // Assert
             Assert.True(result.IsSuccess);
             _unitOfWorkMock.Verify(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Never);
+        }
+
+        [Fact]
+        public async Task Handle_ValidToken_RevokesTokenAndSavesChanges()
+        {
+            // Arrange
+            var command = new RevokeTokenCommand("valid-token");
+            var refreshToken = new RefreshToken
+            {
+                Token = command.Token,
+                UserId = 1,
+                ExpiresOn = DateTime.UtcNow.AddDays(7),
+                RevokedOn = null
+            };
+
+            _refreshTokenRepositoryMock.Setup(x => x.GetAsync(command.Token, It.IsAny<CancellationToken>()))
+                .ReturnsAsync(refreshToken);
+
+            // Act
+            var result = await _handler.Handle(command, CancellationToken.None);
+
+            // Assert
+            Assert.True(result.IsSuccess);
+            Assert.Equal(_utcNow, refreshToken.RevokedOn!.Value, TimeSpan.FromSeconds(1));
+
+            _refreshTokenRepositoryMock.Verify(x => x.GetAsync(command.Token, It.IsAny<CancellationToken>()), Times.Once);
+            _unitOfWorkMock.Verify(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
         }
     }
 }

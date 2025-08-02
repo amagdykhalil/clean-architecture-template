@@ -1,5 +1,6 @@
 using Serilog;
 
+
 namespace SolutionName.API.Extensions.Startup
 {
     public static class LoggingExtensions
@@ -8,7 +9,10 @@ namespace SolutionName.API.Extensions.Startup
         {
             builder.Host.UseSerilog((context, loggerConfig) =>
             loggerConfig.ReadFrom.Configuration(context.Configuration));
-            var logConfiguration = new LoggerConfiguration();
+            var logConfiguration = new LoggerConfiguration()
+                .Enrich.FromLogContext()
+                .Enrich.WithEnvironmentName()
+                .Enrich.WithMachineName();
 
             if (builder.Environment.IsDevelopment())
             {
@@ -19,5 +23,6 @@ namespace SolutionName.API.Extensions.Startup
         }
     }
 }
+
 
 

@@ -1,5 +1,4 @@
-﻿using SolutionName.Persistence.Entities;
-
+﻿
 namespace SolutionName.Application.Features.People.Commands.Add
 {
     /// <summary>

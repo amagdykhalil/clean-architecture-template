@@ -2,7 +2,7 @@
 
 namespace SolutionName.UnitTests.SolutionNamehitectureTests
 {
-    public class SolutionNamehitectureTests
+    public class ArchitectureTests
     {
         private const string APIAssemblyName = "SolutionName.API";
         private const string ApplicationAssemblyName = "SolutionName.Application";

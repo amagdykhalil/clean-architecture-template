@@ -1,4 +1,4 @@
-﻿using SolutionName.Application.Features.Auth.Commands.RevokeToken;
+using SolutionName.Application.Abstractions.Services;
 
 namespace SolutionName.Application.Features.Auth.Commands.RevokeToken
 {
@@ -15,7 +15,7 @@ namespace SolutionName.Application.Features.Auth.Commands.RevokeToken
                 return Result.NoContent();
             }
 
-            var refreshToken = await refreshTokenRepository.GetAsync(request.Token);
+            var refreshToken = await refreshTokenRepository.GetAsync(request.Token, cancellationToken);
 
             if (refreshToken is null || !refreshToken.IsActive)
             {
@@ -24,7 +24,7 @@ namespace SolutionName.Application.Features.Auth.Commands.RevokeToken
 
             // Revoke the token
             refreshToken.RevokedOn = dateTimeProvider.UtcNow;
-            await unitOfWork.SaveChangesAsync();
+            await unitOfWork.SaveChangesAsync(cancellationToken);
 
             return Result.NoContent();
         }

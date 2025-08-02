@@ -1,9 +1,4 @@
-﻿
-
-using Microsoft.Extensions.Localization;
-using Microsoft.Extensions.Logging;
-using SolutionName.Application.Features.Auth;
-using SolutionName.Application.Features.Auth.Commands.Login;
+using SolutionName.Application.Features.Auth.Models;
 
 namespace SolutionName.Application.Features.Auth.Commands.Login
 {
@@ -12,17 +7,26 @@ namespace SolutionName.Application.Features.Auth.Commands.Login
         ITokenProvider tokenProvider,
         IRefreshTokenRepository refreshTokenRepository,
         IUnitOfWork unitOfWork,
-        ILogger<LoginCommandHandler> logger,
-        IStringLocalizer<LoginCommandHandler> localizer)
+        ILogger<LoginCommandHandler> logger)
         : ICommandHandler<LoginCommand, AuthDTO>
     {
         public async Task<Result<AuthDTO>> Handle(LoginCommand request, CancellationToken cancellationToken)
         {
-            var user = await identityService.GetUserAsync(request.Email, request.Password);
+            var user = await identityService.GetUserAsync(request.Email, request.Password, cancellationToken);
 
             if (user == null)
             {
-                return Result<AuthDTO>.Error(localizer[LocalizationKeys.Auth.InvalidCredentials]);
+                return Result<AuthDTO>.Error("Invalid email or password.");
+            }
+
+            if (!await identityService.IsEmailConfirmedAsync(user, cancellationToken))
+            {
+                return Result<AuthDTO>.Unauthorized("You must confirm your email address before logging in.");
+            }
+
+            if (user.DeletedAt != null)
+            {
+                return Result<AuthDTO>.Unauthorized("Your account is inactive.");
             }
 
             var accessToken = await tokenProvider.Create(user);
@@ -33,7 +37,7 @@ namespace SolutionName.Application.Features.Auth.Commands.Login
                 ExpiresOn = tokenProvider.GetAccessTokenExpiration(),
             };
 
-            var ActiveRefreshToken = await refreshTokenRepository.GetActiveRefreshTokenAsync(user.Id);
+            var ActiveRefreshToken = await refreshTokenRepository.GetActiveRefreshTokenAsync(user.Id, cancellationToken);
 
             if (ActiveRefreshToken != null)
             {
@@ -44,16 +48,15 @@ namespace SolutionName.Application.Features.Auth.Commands.Login
             {
                 var refreshToken = refreshTokenRepository.GenerateRefreshToken(user.Id);
 
-                await refreshTokenRepository.AddAsync(refreshToken);
+                await refreshTokenRepository.AddAsync(refreshToken, cancellationToken);
 
                 AuthInfo.RefreshToken = refreshToken.Token;
                 AuthInfo.RefreshTokenExpiration = refreshToken.ExpiresOn;
 
-                await unitOfWork.SaveChangesAsync();
+                await unitOfWork.SaveChangesAsync(cancellationToken);
             }
 
             return Result<AuthDTO>.Success(AuthInfo);
         }
     }
 }
-

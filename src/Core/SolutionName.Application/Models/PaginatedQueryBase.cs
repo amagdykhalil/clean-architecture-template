@@ -2,6 +2,13 @@ using SolutionName.Application.Common.Queries;
 
 namespace SolutionName.Application.Common.Models
 {
+    public enum SortDirection
+    {
+        Asc = 0,
+        Desc = 1
+    }
+
+
     /// <summary>
     /// Base class for paginated queries that provides common pagination functionality.
     /// </summary>
@@ -25,6 +32,9 @@ namespace SolutionName.Application.Common.Models
             get => _pageSize;
             init => _pageSize = value > MaxPageSize ? MaxPageSize : value;
         }
+        public SortDirection SortDirection { get; set; } = SortDirection.Asc;
+
+        public string? SearchQuery { get; set; }
     }
 
     /// <summary>

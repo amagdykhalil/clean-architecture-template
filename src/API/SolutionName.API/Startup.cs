@@ -5,7 +5,6 @@ using SolutionName.API.Middleware;
 using SolutionName.Application;
 using SolutionName.Application.Common.Validator;
 using SolutionName.Infrastructure;
-using SolutionName.Infrastructure.Localization;
 using SolutionName.Persistence;
 
 namespace SolutionName.API
@@ -35,38 +34,36 @@ namespace SolutionName.API
             services.AddDistributedMemoryCache();
 
 
-            services.AddPersistence(_configuration)
-                    .AddInfrastructure(_configuration)
-                    .AddApplication(_configuration);
+            services.AddApplication(_configuration)
+               .AddPersistence(_configuration)
+               .AddInfrastructure(_configuration);
+
+            services.AddJWT(_configuration);
 
             services.AddSingleton<IFluentValidationAutoValidationResultFactory, ValidationResultFactory>();
-            services.AddOpenApi();
+            services.AddOpenApi("v1", options => { options.AddDocumentTransformer<BearerSecuritySchemeTransformer>(); });
 
             services.AddApiVersioning();
             services.AddGlobalRateLimiter();
         }
         public void Configure(WebApplication app)
         {
-
-            if (app.Environment.IsDevelopment())
+            app.MapOpenApi();
+            app.MapScalarApiReference(options =>
             {
-                app.MapOpenApi();
-                app.MapScalarApiReference(options =>
-                {
-                    options.WithTitle("SolutionName API Reference")
-                           .WithDefaultHttpClient(ScalarTarget.CSharp, ScalarClient.HttpClient);
-                });
-            }
+                options.WithTitle("SolutionName API Reference")
+                        .WithDefaultHttpClient(ScalarTarget.CSharp, ScalarClient.HttpClient);
+            });          
 
             app.UseForwardedHeaders();
 
             app.UseExceptionHandler();
             app.UseHttpsRedirection();
 
+            app.UseCors(CorsExtensions.AllowsOrigins);
+
             app.UseAuthentication();
             app.UseAuthorization();
-            app.UseCors(CorsExtensions.AllowsOrigins);
-            app.UseRequestCulture();
 
             app.MapControllers();
         }

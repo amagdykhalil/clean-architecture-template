@@ -2,7 +2,7 @@ using SolutionName.Application.Features.Auth.Commands.Login;
 
 namespace SolutionName.Application.Tests.Features.Auth.Commands
 {
-    public class LoginCommandHandlerTests : IClassFixture<LocalizationKeyFixture>
+    public class LoginCommandHandlerTests
     {
 
         private readonly Mock<IIdentityService> _identityServiceMock;
@@ -10,7 +10,6 @@ namespace SolutionName.Application.Tests.Features.Auth.Commands
         private readonly Mock<IRefreshTokenRepository> _refreshTokenRepositoryMock;
         private readonly Mock<IUnitOfWork> _unitOfWorkMock;
         private readonly Mock<ILogger<LoginCommandHandler>> _loggerMock;
-        private readonly Mock<IStringLocalizer<LoginCommandHandler>> _localizerMock;
         private readonly LoginCommandHandler _handler;
 
         public LoginCommandHandlerTests()
@@ -20,20 +19,13 @@ namespace SolutionName.Application.Tests.Features.Auth.Commands
             _refreshTokenRepositoryMock = new Mock<IRefreshTokenRepository>();
             _unitOfWorkMock = new Mock<IUnitOfWork>();
             _loggerMock = new Mock<ILogger<LoginCommandHandler>>();
-            _localizerMock = new Mock<IStringLocalizer<LoginCommandHandler>>();
-
-            // Setup default localization
-            var localizedString = new LocalizedString(LocalizationKeys.Auth.InvalidCredentials, "Email or password is incorrect!");
-            _localizerMock.Setup(x => x[LocalizationKeys.Auth.InvalidCredentials])
-                .Returns(localizedString);
 
             _handler = new LoginCommandHandler(
                 _identityServiceMock.Object,
                 _tokenProviderMock.Object,
                 _refreshTokenRepositoryMock.Object,
                 _unitOfWorkMock.Object,
-                _loggerMock.Object,
-                _localizerMock.Object
+                _loggerMock.Object
             );
         }
 
@@ -42,12 +34,15 @@ namespace SolutionName.Application.Tests.Features.Auth.Commands
         {
             // Arrange
             var command = new LoginCommand("test@example.com", "hashedPassword");
-            var user = new User { Id = 1, Email = command.Email };
+            var user = new User { Id = 1, Email = command.Email, DeletedAt = null };
             var accessToken = "access-token";
             var tokenExpiration = DateTime.UtcNow.AddHours(1);
 
-            _identityServiceMock.Setup(x => x.GetUserAsync(command.Email, command.Password))
+            _identityServiceMock.Setup(x => x.GetUserAsync(command.Email, command.Password, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(user);
+
+            _identityServiceMock.Setup(x => x.IsEmailConfirmedAsync(user, It.IsAny<CancellationToken>()))
+                .ReturnsAsync(true);
 
             _tokenProviderMock.Setup(x => x.Create(user))
                 .ReturnsAsync(accessToken);
@@ -55,7 +50,7 @@ namespace SolutionName.Application.Tests.Features.Auth.Commands
             _tokenProviderMock.Setup(x => x.GetAccessTokenExpiration())
                 .Returns(tokenExpiration);
 
-            _refreshTokenRepositoryMock.Setup(x => x.GetActiveRefreshTokenAsync(user.Id))
+            _refreshTokenRepositoryMock.Setup(x => x.GetActiveRefreshTokenAsync(user.Id, It.IsAny<CancellationToken>()))
                 .ReturnsAsync((RefreshToken?)null);
 
             var newRefreshToken = new RefreshToken
@@ -78,8 +73,8 @@ namespace SolutionName.Application.Tests.Features.Auth.Commands
             Assert.Equal(newRefreshToken.Token, result.Value.RefreshToken);
             Assert.Equal(newRefreshToken.ExpiresOn, result.Value.RefreshTokenExpiration);
 
-            _refreshTokenRepositoryMock.Verify(x => x.AddAsync(It.IsAny<RefreshToken>()), Times.Once);
-            _unitOfWorkMock.Verify(x => x.SaveChangesAsync(CancellationToken.None), Times.Once);
+            _refreshTokenRepositoryMock.Verify(x => x.AddAsync(It.IsAny<RefreshToken>(), It.IsAny<CancellationToken>()), Times.Once);
+            _unitOfWorkMock.Verify(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
         }
 
         [Fact]
@@ -87,7 +82,7 @@ namespace SolutionName.Application.Tests.Features.Auth.Commands
         {
             // Arrange
             var command = new LoginCommand("test@example.com", "hashedPassword");
-            var user = new User { Id = 1, Email = command.Email };
+            var user = new User { Id = 1, Email = command.Email, DeletedAt = null };
             var accessToken = "access-token";
             var tokenExpiration = DateTime.UtcNow.AddHours(1);
             var existingRefreshToken = new RefreshToken
@@ -96,8 +91,11 @@ namespace SolutionName.Application.Tests.Features.Auth.Commands
                 ExpiresOn = DateTime.UtcNow.AddDays(7)
             };
 
-            _identityServiceMock.Setup(x => x.GetUserAsync(command.Email, command.Password))
+            _identityServiceMock.Setup(x => x.GetUserAsync(command.Email, command.Password, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(user);
+
+            _identityServiceMock.Setup(x => x.IsEmailConfirmedAsync(user, It.IsAny<CancellationToken>()))
+                .ReturnsAsync(true);
 
             _tokenProviderMock.Setup(x => x.Create(user))
                 .ReturnsAsync(accessToken);
@@ -105,7 +103,7 @@ namespace SolutionName.Application.Tests.Features.Auth.Commands
             _tokenProviderMock.Setup(x => x.GetAccessTokenExpiration())
                 .Returns(tokenExpiration);
 
-            _refreshTokenRepositoryMock.Setup(x => x.GetActiveRefreshTokenAsync(user.Id))
+            _refreshTokenRepositoryMock.Setup(x => x.GetActiveRefreshTokenAsync(user.Id, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(existingRefreshToken);
 
             // Act
@@ -119,8 +117,8 @@ namespace SolutionName.Application.Tests.Features.Auth.Commands
             Assert.Equal(existingRefreshToken.Token, result.Value.RefreshToken);
             Assert.Equal(existingRefreshToken.ExpiresOn, result.Value.RefreshTokenExpiration);
 
-            _refreshTokenRepositoryMock.Verify(x => x.AddAsync(It.IsAny<RefreshToken>()), Times.Never);
-            _unitOfWorkMock.Verify(x => x.SaveChangesAsync(CancellationToken.None), Times.Never);
+            _refreshTokenRepositoryMock.Verify(x => x.AddAsync(It.IsAny<RefreshToken>(), It.IsAny<CancellationToken>()), Times.Never);
+            _unitOfWorkMock.Verify(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Never);
         }
 
         [Fact]
@@ -128,25 +126,71 @@ namespace SolutionName.Application.Tests.Features.Auth.Commands
         {
             // Arrange
             var command = new LoginCommand("test@example.com", "hashedPassword");
-            var errorMessage = "Email or password is incorrect!";
 
-            _identityServiceMock.Setup(x => x.GetUserAsync(command.Email, command.Password))
+            _identityServiceMock.Setup(x => x.GetUserAsync(command.Email, command.Password, It.IsAny<CancellationToken>()))
                 .ReturnsAsync((User?)null);
-
-            _localizerMock.Setup(x => x[LocalizationKeys.Auth.InvalidCredentials])
-                .Returns(new LocalizedString(LocalizationKeys.Auth.InvalidCredentials, errorMessage));
 
             // Act
             var result = await _handler.Handle(command, CancellationToken.None);
 
             // Assert
             Assert.False(result.IsSuccess);
-            Assert.Equal(errorMessage, result.Errors.First());
 
             _tokenProviderMock.Verify(x => x.Create(It.IsAny<User>()), Times.Never);
-            _refreshTokenRepositoryMock.Verify(x => x.GetActiveRefreshTokenAsync(It.IsAny<int>()), Times.Never);
-            _refreshTokenRepositoryMock.Verify(x => x.AddAsync(It.IsAny<RefreshToken>()), Times.Never);
-            _unitOfWorkMock.Verify(x => x.SaveChangesAsync(CancellationToken.None), Times.Never);
+            _refreshTokenRepositoryMock.Verify(x => x.GetActiveRefreshTokenAsync(It.IsAny<int>(), It.IsAny<CancellationToken>()), Times.Never);
+            _refreshTokenRepositoryMock.Verify(x => x.AddAsync(It.IsAny<RefreshToken>(), It.IsAny<CancellationToken>()), Times.Never);
+            _unitOfWorkMock.Verify(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Never);
+        }
+
+        [Fact]
+        public async Task Handle_EmailNotConfirmed_ReturnsUnauthorized()
+        {
+            // Arrange
+            var command = new LoginCommand("test@example.com", "hashedPassword");
+            var user = new User { Id = 1, Email = command.Email, DeletedAt = null };
+
+            _identityServiceMock.Setup(x => x.GetUserAsync(command.Email, command.Password, It.IsAny<CancellationToken>()))
+                .ReturnsAsync(user);
+
+            _identityServiceMock.Setup(x => x.IsEmailConfirmedAsync(user, It.IsAny<CancellationToken>()))
+                .ReturnsAsync(false);
+
+
+            // Act
+            var result = await _handler.Handle(command, CancellationToken.None);
+
+            // Assert
+            Assert.False(result.IsSuccess);
+
+            _tokenProviderMock.Verify(x => x.Create(It.IsAny<User>()), Times.Never);
+            _refreshTokenRepositoryMock.Verify(x => x.GetActiveRefreshTokenAsync(It.IsAny<int>(), It.IsAny<CancellationToken>()), Times.Never);
+            _refreshTokenRepositoryMock.Verify(x => x.AddAsync(It.IsAny<RefreshToken>(), It.IsAny<CancellationToken>()), Times.Never);
+            _unitOfWorkMock.Verify(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Never);
+        }
+
+        [Fact]
+        public async Task Handle_UserDeleted_ReturnsUnauthorized()
+        {
+            // Arrange
+            var command = new LoginCommand("test@example.com", "hashedPassword");
+            var user = new User { Id = 1, Email = command.Email, DeletedAt = DateTime.UtcNow };
+
+            _identityServiceMock.Setup(x => x.GetUserAsync(command.Email, command.Password, It.IsAny<CancellationToken>()))
+                .ReturnsAsync(user);
+
+            _identityServiceMock.Setup(x => x.IsEmailConfirmedAsync(user, It.IsAny<CancellationToken>()))
+                .ReturnsAsync(true);
+
+            // Act
+            var result = await _handler.Handle(command, CancellationToken.None);
+
+            // Assert
+            Assert.False(result.IsSuccess);
+
+            _tokenProviderMock.Verify(x => x.Create(It.IsAny<User>()), Times.Never);
+            _refreshTokenRepositoryMock.Verify(x => x.GetActiveRefreshTokenAsync(It.IsAny<int>(), It.IsAny<CancellationToken>()), Times.Never);
+            _refreshTokenRepositoryMock.Verify(x => x.AddAsync(It.IsAny<RefreshToken>(), It.IsAny<CancellationToken>()), Times.Never);
+            _unitOfWorkMock.Verify(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Never);
         }
     }
 }

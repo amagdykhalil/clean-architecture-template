@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using SharpGrip.FluentValidation.AutoValidation.Mvc.Extensions;
+using SolutionName.Application.Features.Auth.Models;
 
 namespace SolutionName.Application
 {
@@ -24,6 +25,8 @@ namespace SolutionName.Application
                 config.EnableQueryBindingSourceAutomaticValidation = true;
                 config.EnablePathBindingSourceAutomaticValidation = true;
             });
+
+            services.Configure<RefreshTokenSettings>(configuration.GetSection("RefreshToken"));
 
             return services;
         }

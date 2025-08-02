@@ -1,4 +1,6 @@
-﻿namespace SolutionName.Persistence.Repositories
+﻿using SolutionName.Domain.Entities;
+
+namespace SolutionName.Persistence.Repositories
 {
     public class PersonRepository : GenericRepository<Person>, IPersonRepository
     {

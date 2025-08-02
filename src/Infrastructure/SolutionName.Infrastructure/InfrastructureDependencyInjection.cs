@@ -1,15 +1,12 @@
-using SolutionName.Application.Abstractions.Services;
-using SolutionName.Infrastructure.Email;
 using Infrastructure.Authentication;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using SolutionName.Application.Abstractions.Infrastructure;
 using SolutionName.Application.Abstractions.Services;
 using SolutionName.Application.Abstractions.UserContext;
-using SolutionName.Infrastructure.Authentication;
 using SolutionName.Infrastructure.Common.Services;
 using SolutionName.Infrastructure.Email;
-using SolutionName.Infrastructure.Localization;
+using SolutionName.Infrastructure.Email.Models;
 
 namespace SolutionName.Infrastructure
 {
@@ -19,20 +16,24 @@ namespace SolutionName.Infrastructure
         {
             services.AddHttpContextAccessor();
 
-            services.AddLocalizationSetup();
-
             // Email services
+            services.Configure<EmailTemplateSettings>(configuration.GetSection("EmailTemplateSettings"));
+            services.Configure<EmailWorkerSettings>(configuration.GetSection("EmailWorkerSettings"));
+
             services.AddTransient<IEmailTemplate, EmailTemplate>();
-            services.AddTransient<IEmailSender, EmailSender>();
             services.AddTransient<IEmailService, EmailService>();
             services.AddTransient<IUserEmailService, UserEmailService>();
+            services.AddTransient<IUserActionLinkBuilder, UserActionLinkBuilder>();
+
+            services.AddSingleton<IEmailSender, EmailSender>();
+            services.AddSingleton<IEmailQueue, InMemoryEmailQueue>();
+            services.AddHostedService<EmailWorker>();
 
             services.AddScoped<IUserContext, UserContext>();
             services.AddScoped<ITokenProvider, TokenProvider>();
             services.AddScoped<IDateTimeProvider, DateTimeProvider>();
 
             services.Configure<SmtpSettings>(configuration.GetSection("SmtpSettings"));
-            JWTExtensions.AddJWT(services, configuration);
             return services;
         }
     }

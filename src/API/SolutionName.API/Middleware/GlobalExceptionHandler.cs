@@ -2,8 +2,6 @@ using FluentValidation;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Localization;
-using SolutionName.Shared.Keys;
 using System.Net;
 using System.Text.Json;
 
@@ -12,12 +10,10 @@ namespace SolutionName.API.Middleware
     public class GlobalExceptionHandler : IExceptionHandler
     {
         private readonly ILogger<GlobalExceptionHandler> _logger;
-        private readonly IStringLocalizer<GlobalExceptionHandler> _localizer;
 
-        public GlobalExceptionHandler(ILogger<GlobalExceptionHandler> logger, IStringLocalizer<GlobalExceptionHandler> localizer)
+        public GlobalExceptionHandler(ILogger<GlobalExceptionHandler> logger)
         {
             _logger = logger;
-            _localizer = localizer;
         }
 
         public async ValueTask<bool> TryHandleAsync(HttpContext httpContext, Exception exception, CancellationToken cancellationToken)
@@ -57,7 +53,6 @@ namespace SolutionName.API.Middleware
                 .Select(e => new ApiErrorResponse(e.ErrorMessage))
                 .ToList();
 
-            // Optionally, you could use a localized summary message here
             return ApiResponse.BadRequest(errors);
         }
 
@@ -65,7 +60,7 @@ namespace SolutionName.API.Middleware
         {
             return ApiResponse.Unauthorized(new List<ApiErrorResponse>
             {
-                new(_localizer[LocalizationKeys.GlobalException.Unauthorized])
+                new("Unauthorized access.")
             });
         }
 
@@ -73,7 +68,7 @@ namespace SolutionName.API.Middleware
         {
             return ApiResponse.NotFound(new List<ApiErrorResponse>
             {
-                new(_localizer[LocalizationKeys.GlobalException.NotFound])
+                new("Resource not found.")
             });
         }
 
@@ -81,7 +76,7 @@ namespace SolutionName.API.Middleware
         {
             return ApiResponse.BadRequest(new List<ApiErrorResponse>
             {
-                new(_localizer[LocalizationKeys.GlobalException.BadRequest, ex.Message])
+                new($"Bad request")
             });
         }
 
@@ -91,7 +86,7 @@ namespace SolutionName.API.Middleware
 
             return ApiResponse.InternalServerError(new List<ApiErrorResponse>
             {
-                new(_localizer[LocalizationKeys.GlobalException.DbError])
+                new("A database error occurred during update.")
             });
         }
 
@@ -101,11 +96,11 @@ namespace SolutionName.API.Middleware
 
             var (statusCode, message) = sqlEx.Number switch
             {
-                2627 or 2601 => (HttpStatusCode.Conflict, _localizer[LocalizationKeys.GlobalException.SqlConflict]), // Unique constraint violation
-                547 => (HttpStatusCode.BadRequest, _localizer[LocalizationKeys.GlobalException.SqlFK]), // FK violation
-                1205 => (HttpStatusCode.Conflict, _localizer[LocalizationKeys.GlobalException.SqlDeadlock]), // Deadlock
-                515 => (HttpStatusCode.BadRequest, _localizer[LocalizationKeys.GlobalException.SqlNotNull]), // Not null violation
-                _ => (HttpStatusCode.InternalServerError, _localizer[LocalizationKeys.GlobalException.SqlFallback]) // Fallback
+                2627 or 2601 => (HttpStatusCode.Conflict, "A record with the same key already exists."),
+                547 => (HttpStatusCode.BadRequest, "This operation violates a foreign key constraint."),
+                1205 => (HttpStatusCode.Conflict, "A database deadlock occurred. Please try again."),
+                515 => (HttpStatusCode.BadRequest, "A required field is missing a value."),
+                _ => (HttpStatusCode.InternalServerError, "A database error occurred.")
             };
 
             return new ApiResponse(false, "", (int)statusCode, new List<ApiErrorResponse>
@@ -120,11 +115,8 @@ namespace SolutionName.API.Middleware
 
             return ApiResponse.InternalServerError(new List<ApiErrorResponse>
             {
-                new(_localizer[LocalizationKeys.GlobalException.Internal])
+                new("An unexpected error occurred. Please try again later.")
             });
         }
     }
 }
-
-
-

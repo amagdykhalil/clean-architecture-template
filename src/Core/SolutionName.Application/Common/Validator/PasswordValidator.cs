@@ -5,12 +5,10 @@ public class PasswordValidator<T> : AsyncPropertyValidator<T, string>
 {
     private const int MaxPasswordLength = 20;
     private readonly IIdentityService _identityService;
-    private readonly IStringLocalizer _localizer;
 
-    public PasswordValidator(IIdentityService identityService, IStringLocalizer localizer)
+    public PasswordValidator(IIdentityService identityService)
     {
         _identityService = identityService;
-        _localizer = localizer;
     }
 
     public override string Name => "PasswordValidator";
@@ -20,10 +18,9 @@ public class PasswordValidator<T> : AsyncPropertyValidator<T, string>
         string value,
         CancellationToken cancellation)
     {
-        // Check max length first
         if (!string.IsNullOrEmpty(value) && value.Length > MaxPasswordLength)
         {
-            var message = _localizer[LocalizationKeys.Validation.PasswordTooLong, MaxPasswordLength];
+            var message = $"Password must not exceed {MaxPasswordLength} characters.";
             context.AddFailure(message);
             return false;
         }
@@ -33,7 +30,7 @@ public class PasswordValidator<T> : AsyncPropertyValidator<T, string>
         if (!validationResult.Succeeded)
         {
             var error = validationResult.Errors.First();
-            var message = GetLocalizationMessage(error.Code, _localizer);
+            var message = GetErrorMessage(error.Code);
             context.AddFailure(message);
             return false;
         }
@@ -41,17 +38,17 @@ public class PasswordValidator<T> : AsyncPropertyValidator<T, string>
         return true;
     }
 
-    private string GetLocalizationMessage(string errorCode, IStringLocalizer localizer)
+    private string GetErrorMessage(string errorCode)
     {
         return errorCode switch
         {
-            "PasswordTooShort" => localizer[LocalizationKeys.Validation.PasswordTooShort, 8],
-            "PasswordRequiresDigit" => localizer[LocalizationKeys.Validation.PasswordRequiresDigit],
-            "PasswordRequiresUpper" => localizer[LocalizationKeys.Validation.PasswordRequiresUpper],
-            "PasswordRequiresLower" => localizer[LocalizationKeys.Validation.PasswordRequiresLower],
-            "PasswordRequiresNonAlphanumeric" => localizer[LocalizationKeys.Validation.PasswordRequiresNonAlphanumeric],
-            "PasswordTooLong" => localizer[LocalizationKeys.Validation.PasswordTooLong, MaxPasswordLength],
-            _ => errorCode // fallback
+            "PasswordTooShort" => "Password must be at least 8 characters.",
+            "PasswordRequiresDigit" => "Password must contain at least one digit.",
+            "PasswordRequiresUpper" => "Password must contain at least one uppercase letter.",
+            "PasswordRequiresLower" => "Password must contain at least one lowercase letter.",
+            "PasswordRequiresNonAlphanumeric" => "Password must contain at least one special character.",
+            "PasswordTooLong" => $"Password must not exceed {MaxPasswordLength} characters.",
+            _ => "The format is invalid."
         };
     }
 }

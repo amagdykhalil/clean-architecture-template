@@ -1,5 +1,4 @@
-
-
+using System.Security.Claims;
 using System.Threading.RateLimiting;
 
 namespace SolutionName.API.Extensions.Startup
@@ -12,7 +11,8 @@ namespace SolutionName.API.Extensions.Startup
             {
                 options.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(context =>
                     RateLimitPartition.GetFixedWindowLimiter(
-                        partitionKey: context.User.Identity?.Name ?? context.Request.Headers.Host.ToString(),
+                        partitionKey: context.User?.FindFirstValue(ClaimTypes.NameIdentifier)
+                        ?? context.Connection.RemoteIpAddress.MapToIPv4().ToString(),
                         factory: partition => new FixedWindowRateLimiterOptions
                         {
                             AutoReplenishment = true,
@@ -24,3 +24,4 @@ namespace SolutionName.API.Extensions.Startup
         }
     }
 }
+

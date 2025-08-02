@@ -10,6 +10,10 @@ namespace SolutionName.Persistence.Extensions
             services.Scan(scan => scan
                  .FromAssembliesOf(typeof(PersistenceDependencyInjection))
                  .AddClasses(classes => classes.AssignableTo<IRepository>())
+                 .As((type) =>
+                     type.GetInterfaces()
+                         .Where(i => typeof(IRepository).IsAssignableFrom(i) && i != typeof(IRepository))
+                 )
                  .AsImplementedInterfaces()
                  .WithScopedLifetime()
              );

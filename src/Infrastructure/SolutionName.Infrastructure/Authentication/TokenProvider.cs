@@ -1,9 +1,10 @@
-using Microsoft.Extensions.Options;
-using Microsoft.IdentityModel.Tokens;
 using SolutionName.Application.Abstractions.Infrastructure;
 using SolutionName.Application.Abstractions.Services;
 using SolutionName.Application.Abstractions.UserContext;
+using SolutionName.Domain.Entities;
 using SolutionName.Infrastructure.Authentication;
+using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
@@ -32,8 +33,6 @@ public sealed class TokenProvider : ITokenProvider
         var claims = new List<Claim>
         {
             new(ClaimTypes.NameIdentifier, user.Id.ToString()),
-            new Claim(JwtRegisteredClaimNames.GivenName, user.Person.FirstName),
-            new Claim(JwtRegisteredClaimNames.FamilyName, user.Person.LastName),
             new(ClaimTypes.Email, user.Email)
         };
         claims.AddRange(roles.Select(r => new Claim(ClaimTypes.Role, r)));

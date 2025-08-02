@@ -1,4 +1,4 @@
-namespace SolutionName.Persistence.Entities
+namespace SolutionName.Domain.Entities
 {
     public class Person : Entity
     {

@@ -1,5 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using SolutionName.Persistence.Entities;
+using SolutionName.Domain.Entities;
 
 namespace SolutionName.Persistence.Configrations
 {

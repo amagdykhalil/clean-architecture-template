@@ -18,14 +18,14 @@ namespace SolutionName.Infrastructure.Email
         public async Task SendConfirmationLinkAsync(User user, string email, string confirmationLink)
         {
             var message = new EmailMessage(
-                "Please Confirm Your Email Address",
+                "Confirm Your Email Address",
                 "EmailConfirmation",
                 new[]
                 {
-                    new Placeholder("UserName", user.UserName ?? user.Email),
-                    new Placeholder("ConfirmationLink", confirmationLink)
+                        new Placeholder("UserName", user.Person.FirstName + " " + user.Person.LastName),
+                        new Placeholder("ConfirmationLink", confirmationLink)
                 },
-                new EmailAddress("noreply@SolutionName.com", "SolutionName Team"),
+                new EmailAddress("noreply@arc.com", "SolutionName Team"),
                 new[] { (EmailAddress)email }
             );
 
@@ -39,14 +39,82 @@ namespace SolutionName.Infrastructure.Email
                 "PasswordReset",
                 new[]
                 {
-                    new Placeholder("UserName", user.UserName ?? user.Email),
-                    new Placeholder("ResetLink", resetLink)
+                        new Placeholder("UserName", user.Person.FirstName + " " + user.Person.LastName),
+                        new Placeholder("ResetLink", resetLink)
                 },
-                new EmailAddress("noreply@SolutionName.com", "SolutionName Team"),
+                new EmailAddress("noreply@arc.com", "SolutionName Team"),
+                new[] { (EmailAddress)email }
+            );
+
+            await _emailService.SendAsync(message);
+        }
+
+        public async Task SendWelcomeAndConfirmationAsync(User user, string email, string confirmationLink)
+        {
+            var message = new EmailMessage(
+                "Welcome to SolutionName! Please Confirm Your Email",
+                "WelcomeAndConfirm",
+                new[]
+                {
+                        new Placeholder("UserName", user.Person.FirstName + " " + user.Person.LastName),
+                        new Placeholder("ConfirmationLink", confirmationLink)
+                },
+                new EmailAddress("noreply@arc.com", "SolutionName Team"),
+                new[] { (EmailAddress)email }
+            );
+
+            await _emailService.SendAsync(message);
+        }
+
+        public async Task SendCreatePasswordLinkAsync(User user, string email, string createPasswordLink)
+        {
+            var message = new EmailMessage(
+                "Create Your Password",
+                "CreatePassword",
+                new[]
+                {
+                        new Placeholder("UserName", user.Person.FirstName + " " + user.Person.LastName),
+                        new Placeholder("ResetLink", createPasswordLink)
+                },
+                new EmailAddress("noreply@arc.com", "SolutionName Team"),
+                new[] { (EmailAddress)email }
+            );
+
+            await _emailService.SendAsync(message);
+        }
+
+        public async Task SendPasswordChangedNotificationAsync(User user, string email, string resetLink)
+        {
+            var message = new EmailMessage(
+                "Your Password Was Changed",
+                "PasswordChanged",
+                new[]
+                {
+                        new Placeholder("UserName", user.Person.FirstName + " " + user.Person.LastName),
+                        new Placeholder("ResetLink", resetLink)
+                },
+                new EmailAddress("noreply@arc.com", "SolutionName Team"),
+                new[] { (EmailAddress)email }
+            );
+
+            await _emailService.SendAsync(message);
+        }
+
+        public async Task SendEmailChangedNotificationAsync(User user, string email, string newEmail)
+        {
+            var message = new EmailMessage(
+                "Your Email Address Was Changed",
+                "EmailChanged",
+                new[]
+                {
+                        new Placeholder("UserName", user.Person.FirstName + " " + user.Person.LastName),
+                        new Placeholder("NewEmail", newEmail)
+                },
+                new EmailAddress("noreply@arc.com", "SolutionName Team"),
                 new[] { (EmailAddress)email }
             );
 
             await _emailService.SendAsync(message);
         }
     }
-} 
+}

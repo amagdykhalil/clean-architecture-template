@@ -14,6 +14,7 @@
     <PackageReference Include="Microsoft.Extensions.Logging" Version="9.0.5" />
     <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="9.0.5" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.12.0" />
+    <PackageReference Include="Respawn" Version="6.2.1" />
     <PackageReference Include="Testcontainers" Version="4.5.0" />
     <PackageReference Include="xunit" Version="2.9.2" />
     <PackageReference Include="xunit.runner.visualstudio" Version="2.8.2" />
@@ -27,7 +28,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="PersistanceTests\Database\Configurations\databasetestsettings.json">
+    <None Update="PersistanceTests\Database\Configurations\appsettings.Testing.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>

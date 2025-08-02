@@ -1,4 +1,5 @@
-﻿namespace SolutionName.Application.Features.Auth.Commands.RevokeToken
+namespace SolutionName.Application.Features.Auth.Commands.RevokeToken
 {
-    public record RevokeTokenCommand(string? Token) : ICommand;
+    public record RevokeTokenCommand(string Token) : ICommand;
 }
+

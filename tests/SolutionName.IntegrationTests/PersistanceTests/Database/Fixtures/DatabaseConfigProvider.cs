@@ -11,7 +11,7 @@ namespace SolutionName.IntegrationTests.PersistanceTests.Database.Fixtures
         {
             Configuration = new ConfigurationBuilder()
                 .SetBasePath(Directory.GetCurrentDirectory())
-                .AddJsonFile("PersistanceTests/Database/Configurations/databasetestsettings.json", optional: false)
+                .AddJsonFile("PersistanceTests/Configurations/appsettings.Testing.json", optional: false)
                 .Build();
         }
 

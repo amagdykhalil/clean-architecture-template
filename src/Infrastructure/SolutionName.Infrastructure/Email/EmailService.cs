@@ -5,12 +5,12 @@ namespace SolutionName.Infrastructure.Email
     public class EmailService : IEmailService
     {
         private readonly IEmailTemplate _emailTemplate;
-        private readonly IEmailSender _emailSender;
+        private readonly IEmailQueue _emailQueue;
 
-        public EmailService(IEmailTemplate emailTemplate, IEmailSender emailSender)
+        public EmailService(IEmailTemplate emailTemplate, IEmailQueue emailQueue)
         {
             _emailTemplate = emailTemplate;
-            _emailSender = emailSender;
+            _emailQueue = emailQueue;
         }
 
         public async Task SendAsync(EmailMessage message)
@@ -25,7 +25,7 @@ namespace SolutionName.Infrastructure.Email
                 message.Bcc,
                 message.Attachments);
 
-            await _emailSender.SendAsync(compiledMessage);
+            await _emailQueue.EnqueueEmailAsync(compiledMessage);
         }
     }
 }

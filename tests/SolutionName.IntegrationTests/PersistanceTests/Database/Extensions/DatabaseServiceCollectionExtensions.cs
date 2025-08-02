@@ -1,6 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using SolutionName.Application.Abstractions.Services;
+using SolutionName.Application.Features.Auth.Models;
 using SolutionName.Infrastructure.Common.Services;
 using SolutionName.Persistence;
 using SolutionName.Persistence.Extensions;
@@ -12,7 +14,7 @@ namespace SolutionName.IntegrationTests.Infrastructure.Extensions
 {
     public static class DatabaseServiceCollectionExtensions
     {
-        public static IServiceCollection ConfigureDatabaseServices(this IServiceCollection services, string connectionString)
+        public static IServiceCollection ConfigureDatabaseServices(this IServiceCollection services, string connectionString, IConfiguration configuration)
         {
             if (string.IsNullOrWhiteSpace(connectionString))
             {
@@ -23,7 +25,8 @@ namespace SolutionName.IntegrationTests.Infrastructure.Extensions
                 .ConfigureLogging()
                 .ConfigureIdentity()
                 .ConfigureDbContext(connectionString)
-                .ConfigureRepositories();
+                .ConfigureRepositories()
+                .Configure<RefreshTokenSettings>(configuration.GetSection("RefreshToken"));
         }
 
         private static IServiceCollection ConfigureLogging(this IServiceCollection services)
@@ -39,7 +42,7 @@ namespace SolutionName.IntegrationTests.Infrastructure.Extensions
 
         private static IServiceCollection ConfigureIdentity(this IServiceCollection services)
         {
-            IdentityExtensions.AddAppIdentity(services);
+            services.AddAppIdentity();
             return services;
         }
 
@@ -53,9 +56,9 @@ namespace SolutionName.IntegrationTests.Infrastructure.Extensions
 
         private static IServiceCollection ConfigureRepositories(this IServiceCollection services)
         {
+            services.ScanAndRegisterRepositories();
+
             services.AddScoped<IUnitOfWork, UnitOfWork>();
-            services.AddScoped<IPersonRepository, PersonRepository>();
-            services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
             services.AddScoped<IIdentityService, IdentityService>();
             services.AddScoped<IDateTimeProvider, DateTimeProvider>();
 

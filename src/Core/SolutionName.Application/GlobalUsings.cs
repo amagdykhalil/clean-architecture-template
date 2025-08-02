@@ -11,4 +11,3 @@ global using SolutionName.Application.Contracts.Persistence;
 global using SolutionName.Application.Contracts.Persistence.Base;
 global using SolutionName.Application.Contracts.Persistence.UoW;
 global using SolutionName.Domain.Entities;
-global using SolutionName.Shared.Keys;

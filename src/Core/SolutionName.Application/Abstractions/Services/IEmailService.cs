@@ -1,5 +1,8 @@
 namespace SolutionName.Application.Abstractions.Services
 {
+    /// <summary>
+    /// Provides functionality to compile and queue email messages using templates.
+    /// </summary>
     public interface IEmailService
     {
         Task SendAsync(EmailMessage message);

@@ -1,5 +1,8 @@
 namespace SolutionName.Application.Abstractions.Services
 {
+    /// <summary>
+    /// Sends compiled email messages using SMTP.
+    /// </summary>
     public interface IEmailSender
     {
         Task SendAsync(CompiledEmailMessage message);

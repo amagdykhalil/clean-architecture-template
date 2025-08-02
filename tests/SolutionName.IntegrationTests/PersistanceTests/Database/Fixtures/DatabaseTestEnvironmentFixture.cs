@@ -1,12 +1,21 @@
 using SolutionName.IntegrationTests.Infrastructure.Extensions;
 using SolutionName.IntegrationTests.PersistanceTests.Database.Fixtures;
 using SolutionName.Persistence;
+using Microsoft.EntityFrameworkCore;
+using Respawn;
+using System.Data.Common;
 
 public class DatabaseTestEnvironmentFixture : IAsyncLifetime
 {
     private readonly DatabaseConfigProvider _configProvider;
     private readonly SqlServerContainerManager _containerManager;
-    public IServiceProvider ServiceProvider { get; private set; }
+
+    private IServiceScope _scope;
+    private Respawner _respawner;
+    private DbConnection _connection;
+
+    public AppDbContext DbContext { get; private set; }
+    public IServiceProvider ServiceProvider => _scope.ServiceProvider;
 
     public DatabaseTestEnvironmentFixture()
     {
@@ -17,18 +26,45 @@ public class DatabaseTestEnvironmentFixture : IAsyncLifetime
 
     public async Task InitializeAsync()
     {
+        Environment.SetEnvironmentVariable("ASPNETCORE_ENVIRONMENT", "Testing");
+
         await _containerManager.InitializeAsync();
 
         var services = new ServiceCollection()
             .AddSingleton(_configProvider.Configuration)
-            .ConfigureDatabaseServices(_configProvider.GetDatabaseSettings().GetConnectionString());
+            .ConfigureDatabaseServices(
+                _containerManager.dbSettings.GetConnectionString(),
+                _configProvider.Configuration);
 
-        ServiceProvider = services.BuildServiceProvider();
+        var rootProvider = services.BuildServiceProvider();
 
-        using var scope = ServiceProvider.CreateScope();
-        var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-        await context.Database.EnsureCreatedAsync();
 
+        _scope = rootProvider.CreateScope();
+        var sp = _scope.ServiceProvider;
+
+        // Resolve AppDbContext and apply migrations
+        DbContext = sp.GetRequiredService<AppDbContext>();
+        await DbContext.Database.MigrateAsync();
+
+        var respawnerOptions = new RespawnerOptions
+        {
+            SchemasToInclude = new[]
+            {
+                "dbo"
+            },
+            DbAdapter = DbAdapter.SqlServer
+        };
+
+        _connection = DbContext.Database.GetDbConnection();
+        await _connection.OpenAsync();
+
+        _respawner = await Respawner.CreateAsync(_connection, respawnerOptions);
+        await ResetDatabase();
+    }
+
+    public async Task ResetDatabase()
+    {
+        await _respawner.ResetAsync(_containerManager.dbSettings.GetConnectionString());
     }
 
     public async Task DisposeAsync()

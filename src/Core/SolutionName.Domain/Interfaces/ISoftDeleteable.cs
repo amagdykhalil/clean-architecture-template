@@ -4,7 +4,7 @@ namespace SolutionName.Domain.Interfaces
     {
         public bool IsDeleted => DeletedAt.HasValue;
         public DateTime? DeletedAt { get; set; }
-        int? DeletedBy { get; set; }
+        public int? DeletedBy { get; set; }
     }
 }
 

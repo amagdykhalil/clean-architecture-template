@@ -1,5 +1,8 @@
+using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Options;
 using SolutionName.Application.Abstractions.Services;
-using SolutionName.Shared.Keys;
+using SolutionName.Infrastructure.Email.Models;
+using SolutionName.Shared.SolutionName.Shared;
 using System.Reflection;
 using System.Text.RegularExpressions;
 
@@ -8,11 +11,18 @@ namespace SolutionName.Infrastructure.Email
     public class EmailTemplate : IEmailTemplate
     {
         private readonly Assembly _assembly;
+        private readonly IDistributedCache _cache;
+        private readonly int _cacheExpirationDays;
+        private const string CacheKeyPrefix = "EmailTemplate_";
 
-        public EmailTemplate()
+        public EmailTemplate(IDistributedCache cache, IOptions<EmailTemplateSettings> emailTemplate)
         {
-            _assembly = typeof(LocalizationKeys).Assembly;
+            _assembly = typeof(SharedAssemblyReference).Assembly;
+            _cache = cache;
+            _cacheExpirationDays = emailTemplate.Value.CacheExpirationDays;
         }
+
+        private string GetCacheKey(string templateName) => $"{CacheKeyPrefix}{templateName}";
 
         public async Task<EmailBody> CompileAsync(string templateName, IEnumerable<Placeholder> placeholders)
         {
@@ -25,8 +35,13 @@ namespace SolutionName.Infrastructure.Email
 
         private async Task<string> LoadTemplateAsync(string templateName)
         {
-            var resourceName = $"SolutionName.Shared.Templates.{templateName}.html";
+            var cacheKey = GetCacheKey(templateName);
+            string cached = _cache.GetString(cacheKey);
 
+            if (!string.IsNullOrEmpty(cached))
+                return cached;
+
+            var resourceName = $"SolutionName.Shared.Templates.{templateName}.html";
             using var stream = _assembly.GetManifestResourceStream(resourceName);
             if (stream == null)
             {
@@ -34,7 +49,10 @@ namespace SolutionName.Infrastructure.Email
             }
 
             using var reader = new StreamReader(stream);
-            return await reader.ReadToEndAsync();
+            var template = await reader.ReadToEndAsync();
+            _cache.SetString(cacheKey, template, new DistributedCacheEntryOptions 
+            { AbsoluteExpirationRelativeToNow = TimeSpan.FromDays(_cacheExpirationDays) });
+            return template;
         }
 
         private string ReplacePlaceholders(string template, IEnumerable<Placeholder> placeholders)

@@ -84,6 +84,9 @@ public class ApiResponse
     public static ApiResponse InternalServerError(IEnumerable<ApiErrorResponse> errors) =>
         new() { IsSuccess = false, StatusCode = StatusCodes.Status500InternalServerError, Errors = errors };
 
+    public static ApiResponse Conflict(IEnumerable<ApiErrorResponse> errors) =>
+        new() { IsSuccess = false, StatusCode = StatusCodes.Status409Conflict, Errors = errors };
+
     private static ApiErrorResponse[] CreateErrors(string errorMessage) =>
         [new ApiErrorResponse(errorMessage)];
 

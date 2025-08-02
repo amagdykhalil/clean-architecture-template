@@ -5,9 +5,9 @@ namespace SolutionName.Application.Contracts.Persistence
     /// </summary>
     public interface IRefreshTokenRepository : IGenericRepository<RefreshToken>, IRepository
     {
-        Task<RefreshToken?> GetActiveRefreshTokenAsync(int UserId);
-        Task<RefreshToken?> GetAsync(string token);
-        Task<RefreshToken?> GetWithUserAsync(string token);
+        Task<RefreshToken?> GetActiveRefreshTokenAsync(int UserId, CancellationToken cancellationToken = default);
+        Task<RefreshToken?> GetAsync(string token, CancellationToken cancellationToken = default);
+        Task<RefreshToken?> GetWithUserAsync(string token, CancellationToken cancellationToken = default);
         RefreshToken GenerateRefreshToken(int UserId);
     }
 }

@@ -1,15 +1,13 @@
+using SolutionName.Application.Common.Validator;
+
 namespace SolutionName.Application.Features.Auth.Commands.ForgotPassword
 {
     public class ForgotPasswordCommandValidator : AbstractValidator<ForgotPasswordCommand>
     {
-        public ForgotPasswordCommandValidator(
-            IStringLocalizer<ForgotPasswordCommandValidator> localizer)
+        public ForgotPasswordCommandValidator()
         {
             RuleFor(f => f.Email)
-                .NotEmpty()
-                .WithMessage(localizer[LocalizationKeys.Validation.EmailRequired])
-                .EmailAddress()
-                .WithMessage(localizer[LocalizationKeys.Validation.InvalidEmail]);
+                .SetValidator(new CustomEmailValidator<ForgotPasswordCommand>( true));
         }
     }
-} 
+}

@@ -1,4 +1,7 @@
-﻿using SolutionName.Application.Features.Auth;
+﻿using Microsoft.AspNetCore.Authorization;
+using SolutionName.Application.Features.Auth;
+using SolutionName.Application.Features.Auth.Commands.ChangeEmail;
+using SolutionName.Application.Features.Auth.Commands.ChangePassword;
 using SolutionName.Application.Features.Auth.Commands.ConfirmEmail;
 using SolutionName.Application.Features.Auth.Commands.ForgotPassword;
 using SolutionName.Application.Features.Auth.Commands.Login;
@@ -6,6 +9,7 @@ using SolutionName.Application.Features.Auth.Commands.RefreshToken;
 using SolutionName.Application.Features.Auth.Commands.ResendConfirmationEmail;
 using SolutionName.Application.Features.Auth.Commands.ResetPassword;
 using SolutionName.Application.Features.Auth.Commands.RevokeToken;
+using SolutionName.Application.Features.Auth.Models;
 
 namespace SolutionName.API.Controllers.V1
 {
@@ -35,13 +39,13 @@ namespace SolutionName.API.Controllers.V1
         /// Sets refresh token in an HTTP-only cookie for subsequent token refresh operations.
         /// </returns>
         [HttpPost("login")]
+        [AllowAnonymous]
         [ApiResponse(StatusCodes.Status200OK, typeof(AuthDTO))]
         [ApiResponse(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> Login([FromBody] LoginCommand command)
+        public async Task<IActionResult> Login([FromBody] LoginCommand command, CancellationToken cancellationToken)
         {
 
-            var response = await _mediator.Send(command);
-
+            var response = await _mediator.Send(command, cancellationToken);
             if (response.IsSuccess)
             {
                 SetRefreshTokenCookie(response.Value.RefreshToken, response.Value.RefreshTokenExpiration);
@@ -58,13 +62,15 @@ namespace SolutionName.API.Controllers.V1
         /// Updates the refresh token cookie with the new token.
         /// </returns>
         [HttpPost("refresh-token")]
+        [AllowAnonymous]
         [ApiResponse(StatusCodes.Status200OK, typeof(AuthDTO))]
         [ApiResponse(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> RefreshToken()
+        [EndpointDescription("Refreshes the access token using the refresh token stored in the cookie.")]
+        public async Task<IActionResult> RefreshToken(CancellationToken cancellationToken)
         {
             var refreshToken = HttpContext.Request.Cookies[RefreshTokenCookieName];
             var command = new RefreshTokenCommand(refreshToken);
-            var response = await _mediator.Send(command);
+            var response = await _mediator.Send(command, cancellationToken);
 
             if (response.IsSuccess)
             {
@@ -79,12 +85,14 @@ namespace SolutionName.API.Controllers.V1
         /// </summary>
         /// <returns>Returns 204 No Content on successful token revocation.</returns>
         [HttpPost("revoke-token")]
+        [Authorize]
         [ApiResponse(StatusCodes.Status204NoContent)]
-        public async Task<IActionResult> RevokeToken()
+        [EndpointDescription("Revokes the current refresh token and removes it from the cookie.")]
+        public async Task<IActionResult> RevokeToken(CancellationToken cancellationToken)
         {
             var refreshToken = Request.Cookies[RefreshTokenCookieName];
             var command = new RevokeTokenCommand(refreshToken);
-            var response = await _mediator.Send(command);
+            var response = await _mediator.Send(command, cancellationToken);
 
             HttpContext.Response.Cookies.Delete(RefreshTokenCookieName);
             return response.ToActionResult();
@@ -98,15 +106,15 @@ namespace SolutionName.API.Controllers.V1
         /// <param name="changedEmail">Optional new email address if changing email.</param>
         /// <returns>Returns 200 OK on successful email confirmation.</returns>
         [HttpGet("confirm-email")]
+        [AllowAnonymous]
         [ApiResponse(StatusCodes.Status200OK)]
-        [ApiResponse(StatusCodes.Status400BadRequest)]
+        [EndpointDescription("Confirms a user's email address using the provided confirmation code.")]
         public async Task<IActionResult> ConfirmEmail(
-            [FromQuery] string userId,
-            [FromQuery] string code,
-            [FromQuery] string? changedEmail = null)
+            [FromQuery] ConfirmEmailCommand command,
+            CancellationToken cancellationToken = default)
         {
-            var command = new ConfirmEmailCommand(userId, code, changedEmail);
-            var response = await _mediator.Send(command);
+
+            var response = await _mediator.Send(command, cancellationToken);
             return response.ToActionResult();
         }
 
@@ -116,11 +124,13 @@ namespace SolutionName.API.Controllers.V1
         /// <param name="command">The resend confirmation email request.</param>
         /// <returns>Returns 200 OK on successful email sending.</returns>
         [HttpPost("resend-confirmation-email")]
+        [AllowAnonymous]
         [ApiResponse(StatusCodes.Status200OK)]
         [ApiResponse(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> ResendConfirmationEmail([FromBody] ResendConfirmationEmailCommand command)
+        [EndpointDescription("Resends email confirmation to the specified email address.")]
+        public async Task<IActionResult> ResendConfirmationEmail([FromBody] ResendConfirmationEmailCommand command, CancellationToken cancellationToken)
         {
-            var response = await _mediator.Send(command);
+            var response = await _mediator.Send(command, cancellationToken);
             return response.ToActionResult();
         }
 
@@ -130,11 +140,13 @@ namespace SolutionName.API.Controllers.V1
         /// <param name="command">The forgot password request.</param>
         /// <returns>Returns 200 OK on successful email sending.</returns>
         [HttpPost("forgot-password")]
+        [AllowAnonymous]
         [ApiResponse(StatusCodes.Status200OK)]
         [ApiResponse(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordCommand command)
+        [EndpointDescription("Sends a password reset link to the specified email address.")]
+        public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordCommand command, CancellationToken cancellationToken)
         {
-            var response = await _mediator.Send(command);
+            var response = await _mediator.Send(command, cancellationToken);
             return response.ToActionResult();
         }
 
@@ -145,10 +157,39 @@ namespace SolutionName.API.Controllers.V1
         /// <returns>Returns 200 OK on successful password reset.</returns>
         [HttpPost("reset-password")]
         [ApiResponse(StatusCodes.Status200OK)]
-        [ApiResponse(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordCommand command)
+        [EndpointDescription("Resets a user's password using the provided reset code.")]
+        public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordCommand command, CancellationToken cancellationToken)
         {
-            var response = await _mediator.Send(command);
+            var response = await _mediator.Send(command, cancellationToken);
+            return response.ToActionResult();
+        }
+
+        /// <summary>
+        /// Requests a change of email by sending a confirmation link to the new email address.
+        /// </summary>
+        /// <param name="newEmail">The new email address to change to.</param>
+        /// <returns>Returns 200 OK if the confirmation email was sent (or request accepted).</returns>
+        [HttpPost("change-email")]
+        [ApiResponse(StatusCodes.Status200OK)]
+        [EndpointDescription("Requests a change of email by sending a confirmation link to the new email address.")]
+        public async Task<IActionResult> RequestChangeEmail([FromBody] ChangeEmailCommand command, CancellationToken cancellationToken)
+        {
+            var response = await _mediator.Send(command, cancellationToken);
+            return response.ToActionResult();
+        }
+
+        /// <summary>
+        /// Changes the password for a specific user.
+        /// </summary>
+        /// <param name="command">The change password request.</param>
+        /// <returns>Returns 200 OK on successful password change.</returns>
+        [HttpPost("change-password")]
+        [ApiResponse(StatusCodes.Status200OK)]
+        [ApiResponse(StatusCodes.Status400BadRequest)]
+        [EndpointDescription("Changes the password for a specific user.")]
+        public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordCommand command, CancellationToken cancellationToken)
+        {
+            var response = await _mediator.Send(command, cancellationToken);
             return response.ToActionResult();
         }
 
@@ -162,7 +203,7 @@ namespace SolutionName.API.Controllers.V1
 
             var cookieOptions = new CookieOptions
             {
-                HttpOnly = true, // Prevents JavaScript access to the cookie
+                HttpOnly = true,
                 Secure = true,   // Only sent over HTTPS
                 IsEssential = true,
                 SameSite = SameSiteMode.None, // Allows cross-site requests

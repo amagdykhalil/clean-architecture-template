@@ -1,5 +1,3 @@
-
-
 namespace SolutionName.Application.Abstractions.Infrastructure
 {
     /// <summary>
@@ -21,5 +19,6 @@ namespace SolutionName.Application.Abstractions.Infrastructure
         DateTime GetAccessTokenExpiration();
     }
 }
+
 
 
