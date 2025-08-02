@@ -62,8 +62,8 @@ This is a .NET-based clean architecture template that provides a solid foundatio
 ### 1. Clone and Setup
 
 ```bash
-git clone https://github.com/amagdykhalil/clean-architecture-template.git
-cd clean-architecture-template
+git clone https://github.com/amagdykhalil/clean-architecture-template.git <new-folder-name>
+cd <new-folder-name>
 ```
 
 ### 2. Customize Project Name
